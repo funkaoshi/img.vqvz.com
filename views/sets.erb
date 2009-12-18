@@ -1,0 +1,45 @@
+<!DOCTYPE HTML>
+<html lang=en>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+  <title>VQVZ</title>
+  <link rel="stylesheet" href="/css/vqvz.css"
+    type="text/css" media="screen" title="default style sheet" charset="utf-8" />
+</head>
+
+<body>
+<div id="gallery-banner">
+	<table cellspacing="0" cellpadding="0"><tr>
+		<td><h1><a href="http://funkaoshi.com/">A Funkaoshi Production</a> presents <a href="/">IMG VQVZ</a>.</h1></td>
+		<td align="right">What's Here: <a href="/">Home</a> | <a href="/about">About</a> | <a href="/sets">Sets</a></td>
+    </tr></table>
+</div>
+<div id="content">
+    <div id="header">
+        <h2>Sets</h2>
+    </div>
+    <div class="photo">
+    <table id="sets">
+    <% @sets.each do |set| %>
+    <tr>
+      <td><a href="/set/<%= set.slug %>"><img src="<%= set.thumbnail %>" /></a></td>
+      <td><h3><a href="/set/<%= set.slug %>"><%= set.title %></a></h3></td>
+    </tr>
+    <% end %>
+    </table>
+    <p style="color:gray;margin-top:5em">Everything here is copyright Ramanan Sivaranjan 2009.</p>
+    </div>
+</div>
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try {
+   var pageTracker = _gat._getTracker("UA-2675737-7");
+   pageTracker._trackPageview();
+} catch(err) {}</script>
+</body>
+
+</html>

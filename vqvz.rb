@@ -4,6 +4,8 @@ require 'flickraw/lib/flickraw.rb'
 
 configure do
   CONF = YAML::load_file("conf.yml")
+  SETS = YAML::load_file("sets.yml")
+  SET_IDS = SETS.map { |name, set| set[:set_id] }
   CONF[:user_id] = flickr.people.findByUsername(:username => CONF[:user]).id
   user = flickr.people.getInfo(:user_id => CONF[:user_id])
   CONF[:total_pages] = user.photos.count.to_i / 10 + 1
@@ -27,10 +29,22 @@ class Image
   end
 end
 
+# basic information about a set
+class FlickrSet
+  attr_accessor :id, :title, :thumbnail, :slug
+  def slug
+    @slug ||= @title.downcase.gsub(/[^a-z0-9_]/, '-')
+  end
+  def initialize(id, title, thumbnail, slug = nil)
+    @id, @title, @thumbnail, @slug = id, title, thumbnail, slug
+  end
+end
+  
 helpers do
   # Loads 10 images from Flickr, offset by however many pages.
   # If :tag is specified in the conf file, we filter by that
-  # machine tag.
+  # machine tag. if tag is supplied as a parameter, we will
+  # filter by that instead.
   def load_images(page, tag=nil)
     @page = page.to_i
     @tag = tag
@@ -38,9 +52,21 @@ helpers do
     params[:machine_tags] = CONF[:tag] unless CONF[:tag].nil?
     params[:machine_tags] = tag unless tag.nil?
     params[:per_page] = 10 unless page == 0
-    params[:page] = page unless page = 0
-    photos = flickr.photos.search(params)
-    @sequence = photos.map do |photo| 
+    params[:page] = page unless page == 0
+    @sequence = build_sequence(flickr.photos.search(params))
+  end
+
+  def load_set(id)
+    @page = 0
+    @tag = id
+    params = { :user_id => CONF[:user_id], :extras => 'date_taken', :photoset_id => id }
+    set_info = flickr.photosets.getPhotos(params)
+    @sequence = build_sequence(set_info.photo)
+  end    
+
+  def build_sequence(photos)
+    return [] if photos.nil?
+    photos.map do |photo| 
       sizes = flickr.photos.getSizes(:photo_id => photo.id)
       size = sizes.find { |s| s.label == 'Large' }
       size ||= sizes.find { |s| s.label == 'Medium'}
@@ -61,9 +87,21 @@ get '/page/:num' do |page|
   erb :index
 end
 
-get '/set/:name' do |name|
-  load_images(0, "vqvz:set=#{name}")
+get %r{/set/(\d+)} do |id|
+  load_set(id)
   erb :index
+end
+
+get '/set/:name' do |name|
+  SETS[name].nil? ? load_images(0, "vqvz:set=#{name}") : load_set(SETS[name][:set_id])
+  erb :index
+end
+
+get '/sets' do 
+  @sets = SETS.map do |slug, set|
+    FlickrSet.new(set[:set_id], set[:title], set[:thumbnail], slug)
+  end
+  erb :sets
 end
 
 get '/about/?' do 

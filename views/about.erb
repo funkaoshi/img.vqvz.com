@@ -12,35 +12,29 @@
 <div id="gallery-banner">
 	<table cellspacing="0" cellpadding="0"><tr>
 		<td><h1><a href="http://funkaoshi.com/">A Funkaoshi Production</a> presents <a href="/">IMG VQVZ</a>.</h1></td>
-		<td align="right">What's Here: <a href="/">Home</a>
-            | <a href="/about/">About</a> &nbsp; &nbsp; 
-            Look Around: Prev| <a href="/">Home</a> | Next</a>
+		<td align="right">What's Here: <a href="/">Home</a> | <a href="/about">About</a> | <a href="/sets">Sets</a></td>
     </tr></table>
 </div>
 <div id="content">
     <div id="header">
-        <h1><%= @config[:title] %></h1>
-        <h2><%= @config[:description] %></h2>
+       <h2>About</h2>
     </div>
     <div class="photo hentry" id="about">
        <a href="http://www.flickr.com/photos/funkaoshi/4189316800/" title="Ricoh GR1s by funkaoshi, on Flickr"><img src="http://farm3.static.flickr.com/2501/4189316800_ff3675c6b4.jpg" width="500" height="322" alt="Ricoh GR1s" /></a>
-        <h3>About</h3>
-        <p>Right now this site is simply a nicer way to look at my photos on Flickr. At some point this site will present a selection of my photos from Flickr. Or maybe the site will do both of these things.</p>
-        <p>You can browse the photos on this site using the keys 'j' and 'k'. 'j' will advance to the next photo (and if needed the next page) and 'k' will move to the previous photo (and if needed the previous page). This is similar to what you might have seen in use at the Big Picture, or in Gmail.</p>
-        <p>The site was built using <a href="http://www.sinatrarb.com/" title="Sinatra">Sinatra</a>, a (simple) Ruby web framework. The goal was to see if I can use Flickr as the backend for a photoblog. This is looking quite likely. I will probably use this code as a starting point for another project, <a href="http://blansdowne.ca">Bloor and Lansdowne is Blansdowne.</a></p>
-        <p>My previous photoblog was <a href="http://funkaoshi.com/abuse/">We Must Abuse the Broadband</a>. It is missed.</p>
-        <p style="color:gray;margin-top:5em">Everything here is copyright Ramanan Sivaranjan 2009.</p>
+       <%= @config[:about] %>
     </div>
 </div>
+<% unless @config[:analytics].nil? %>
 <script type="text/javascript">
 var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
 document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
 </script>
 <script type="text/javascript">
 try {
-   var pageTracker = _gat._getTracker("UA-2675737-7");
+   var pageTracker = _gat._getTracker("<%= @config[:analytics] %>");
    pageTracker._trackPageview();
 } catch(err) {}</script>
+<% end %>
 </body>
 
 </html>
