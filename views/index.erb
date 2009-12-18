@@ -13,6 +13,7 @@
 </head>
 
 <!-- <%= @config[:user] %> | <%= @config[:user_id] %> | <%= @config[:tag] %> | <%= @page unless @page.nil? %> -->
+<!-- <%= @tag %> -->
 
 <body>
 <div id="gallery-banner">
@@ -20,9 +21,11 @@
 		<td><h1><a href="http://funkaoshi.com/">A Funkaoshi Production</a> presents <a href="/">IMG VQVZ</a>.</h1></td>
 		<td align="right">What's Here: <a href="/">Home</a>
             | <a href="/about/">About</a> &nbsp; &nbsp; 
-            Look Around: <% if @page > 1 %><a href="/<%= @page - 1 %>" class="prev_page">Prev</a><% else %>Prev<% end %>
+            <% unless @page == 0 %>
+            Look Around: <% if @page > 1 %><a href="/page/<%= @page - 1 %>" class="prev_page">Prev</a><% else %>Prev<% end %>
             | <a href="/">Home</a> | 
-            <% if @page < @config[:total_pages] %><a href="/<%= @page + 1 %>" class="next_page">Next</a><% else %>Next<% end %>
+            <% if @page < @config[:total_pages] %><a href="/page/<%= @page + 1 %>" class="next_page">Next</a><% else %>Next<% end %>
+            <% end %>
     </tr></table>
 </div>
 <div id="content">
@@ -38,13 +41,24 @@
 </div>
 <div id="footer">
   <span class="float_left">Everything here is copyright Ramanan Sivaranjan 2009.</span>
+  <% unless @page == 0 %>
   <span class="float_right">
-     <% if @page > 1 %><a href="/<%= @page - 1 %>" class="prev_page">Prev</a> | <% end %>
+     <% if @page > 1 %><a href="/page/<%= @page - 1 %>" class="prev_page">Prev</a> | <% end %>
      page <%= @page %> of <%= @config[:total_pages] %>
-     <% if @page < @config[:total_pages] %> | <a href="/<%= @page + 1 %>" class="next_page">Next</a><% end %></span>
+     <% if @page < @config[:total_pages] %> | <a href="/page/<%= @page + 1 %>" class="next_page">Next</a><% end %></span>
   </span>
+  <% end %>
   &nbsp;
 </div>
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try {
+   var pageTracker = _gat._getTracker("UA-2675737-7");
+   pageTracker._trackPageview();
+} catch(err) {}</script>
 </body>
 
 </html>

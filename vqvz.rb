@@ -31,10 +31,14 @@ helpers do
   # Loads 10 images from Flickr, offset by however many pages.
   # If :tag is specified in the conf file, we filter by that
   # machine tag.
-  def load_images(page)
+  def load_images(page, tag=nil)
     @page = page.to_i
-    params = { :per_page => 10, :page => page, :user_id => CONF[:user_id], :extras => 'date_taken' }
+    @tag = tag
+    params = { :user_id => CONF[:user_id], :extras => 'date_taken' }
     params[:machine_tags] = CONF[:tag] unless CONF[:tag].nil?
+    params[:machine_tags] = tag unless tag.nil?
+    params[:per_page] = 10 unless page == 0
+    params[:page] = page unless page = 0
     photos = flickr.photos.search(params)
     @sequence = photos.map do |photo| 
       sizes = flickr.photos.getSizes(:photo_id => photo.id)
@@ -52,8 +56,13 @@ get '/' do
 end
 
 # loads the most recent photos from Flickr, offset by however many pages.
-get '/:num' do |page|
+get '/page/:num' do |page|
   load_images(page)
+  erb :index
+end
+
+get '/set/:name' do |name|
+  load_images(0, "vqvz:set=#{name}")
   erb :index
 end
 
