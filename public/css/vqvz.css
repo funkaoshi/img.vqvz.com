@@ -1,0 +1,64 @@
+body {
+	background: #FFF; color:#000;
+	font: 12px Helvetica, Calibri, Arial, Sans-Serief;
+	margin:0;padding:0;
+}
+
+#content {
+    width:1026px;
+    margin:0 auto;    
+}
+
+/* Header */
+
+#header {
+    margin:50px 0;
+}
+
+h1, h2 {
+    margin:0;
+}
+
+/* Style Photo */
+
+.photo {
+    margin-bottom:100px;
+    clear:both;
+}
+
+.photo img {
+    border:1px solid black;
+}
+
+.caption p {
+    text-align:left;
+    color:gray;
+}
+
+.caption p {
+    float:left;
+}
+
+.caption p.date {
+    float:right;
+}
+
+/* Footer */
+
+#footer {
+    clear:both;
+    margin:0px;
+    padding:10px;
+    color:black;
+    background-color:#eeeeee;
+    border-top:1px solid black;
+}
+
+a {
+    text-decoration: none;
+    font-weight: bold;
+    color: #333;
+}
+
+.float_right { float: right; }
+.float_left { float: left;}

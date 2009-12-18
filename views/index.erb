@@ -1,0 +1,40 @@
+<!DOCTYPE HTML>
+<html lang=en>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+  <title>VQVZ</title>
+  <link rel="stylesheet" href="/css/vqvz.css"
+    type="text/css" media="screen" title="default style sheet" charset="utf-8" />
+  <link rel="stylesheet" href="/css/paging_keys.css"
+    type="text/css" media="screen" title="paging keys css" charset="utf-8" />
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
+  <script type="text/javascript" src="/js/paging_keys.js"></script>
+</head>
+
+<!-- <%= @config[:user] %> | <%= @config[:user_id] %> | <%= @config[:tag] %> | <%= @num unless @num.nil? %> -->
+
+<body>
+<div id="content">
+    <div id="header">
+        <h1><%= @config[:title] %></h1>
+        <h2><%= @config[:description] %></h2>
+    </div>
+    <% @sequence.each do |img| %>
+    <div class="photo hentry" id="<% img.id %>">
+        <a href="<%= img.flickr_url %>"><img src="<%= img.img_url %>" /></a>
+    </div>
+    <% end %>
+</div>
+    <div id="footer">
+      <span class="float_left">Everything here is copyright Ramanan Sivaranjan 2009.</span>
+      <span class="float_right">
+         <% if @num > 1 %><a href="/page-<%= @num - 1 %>" class="prev_page">Prev</a> | <% end %>
+         page <%= @num %> of <%= @config[:total_pages] %>
+         <% if @num < @config[:total_pages] %> | <a href="/page-<%= @num + 1 %>" class="next_page">Next</a><% end %></span>
+      </span>
+      &nbsp;
+    </div>
+</body>
+
+</html>
