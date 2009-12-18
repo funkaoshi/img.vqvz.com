@@ -12,9 +12,19 @@
   <script type="text/javascript" src="/js/paging_keys.js"></script>
 </head>
 
-<!-- <%= @config[:user] %> | <%= @config[:user_id] %> | <%= @config[:tag] %> | <%= @num unless @num.nil? %> -->
+<!-- <%= @config[:user] %> | <%= @config[:user_id] %> | <%= @config[:tag] %> | <%= @page unless @page.nil? %> -->
 
 <body>
+<div id="gallery-banner">
+	<table cellspacing="0" cellpadding="0"><tr>
+		<td><h1><a href="http://funkaoshi.com/">A Funkaoshi Production</a> presents <a href="/">IMG VQVZ</a>.</h1></td>
+		<td align="right">What's Here: <a href="/">Home</a>
+            | <a href="/about/">About</a> &nbsp; &nbsp; 
+            Look Around: <% if @page > 1 %><a href="/<%= @page - 1 %>" class="prev_page">Prev</a><% else %>Prev<% end %>
+            | <a href="/">Home</a> | 
+            <% if @page < @config[:total_pages] %><a href="/<%= @page + 1 %>" class="next_page">Next</a><% else %>Next<% end %>
+    </tr></table>
+</div>
 <div id="content">
     <div id="header">
         <h1><%= @config[:title] %></h1>
@@ -26,15 +36,15 @@
     </div>
     <% end %>
 </div>
-    <div id="footer">
-      <span class="float_left">Everything here is copyright Ramanan Sivaranjan 2009.</span>
-      <span class="float_right">
-         <% if @num > 1 %><a href="/page-<%= @num - 1 %>" class="prev_page">Prev</a> | <% end %>
-         page <%= @num %> of <%= @config[:total_pages] %>
-         <% if @num < @config[:total_pages] %> | <a href="/page-<%= @num + 1 %>" class="next_page">Next</a><% end %></span>
-      </span>
-      &nbsp;
-    </div>
+<div id="footer">
+  <span class="float_left">Everything here is copyright Ramanan Sivaranjan 2009.</span>
+  <span class="float_right">
+     <% if @page > 1 %><a href="/<%= @page - 1 %>" class="prev_page">Prev</a> | <% end %>
+     page <%= @page %> of <%= @config[:total_pages] %>
+     <% if @page < @config[:total_pages] %> | <a href="/<%= @page + 1 %>" class="next_page">Next</a><% end %></span>
+  </span>
+  &nbsp;
+</div>
 </body>
 
 </html>

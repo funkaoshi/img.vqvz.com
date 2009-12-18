@@ -15,6 +15,7 @@ before do
   @config = CONF
 end
 
+# Some basic information about an image (on Flickr)
 class Image
   attr_accessor :id, :img_url, :flickr_url, :title, :date
   def initialize(id, img_url,title, date)
@@ -27,29 +28,37 @@ class Image
 end
 
 helpers do
+  # Loads 10 images from Flickr, offset by however many pages.
+  # If :tag is specified in the conf file, we filter by that
+  # machine tag.
   def load_images(page)
-    params = {  :per_page => 10, :page => page, :user_id => CONF[:user_id] }
+    @page = page.to_i
+    params = { :per_page => 10, :page => page, :user_id => CONF[:user_id], :extras => 'date_taken' }
     params[:machine_tags] = CONF[:tag] unless CONF[:tag].nil?
     photos = flickr.photos.search(params)
-    @sequence = []
-    photos.each do |photo| 
-      info = flickr.photos.getInfo(:photo_id => photo.id, :secret => photo.secret)
-      @sequence << Image.new(info.id, FlickRaw.url_b(info), info.title, info.dates.taken[0..9])
+    @sequence = photos.map do |photo| 
+      sizes = flickr.photos.getSizes(:photo_id => photo.id)
+      size = sizes.find { |s| s.label == 'Large' }
+      size ||= sizes.find { |s| s.label == 'Medium'}
+      Image.new(photo.id, size.source, photo.title, photo.datetaken[0..9])
     end
   end
 end
     
-
+# loads the most recent photos from Flickr
 get '/' do
   load_images(1)
-  @num = 1
   erb :index
 end
 
-get '/page-:num' do |num|
-  load_images(num)
-  @num = num.to_i
+# loads the most recent photos from Flickr, offset by however many pages.
+get '/:num' do |page|
+  load_images(page)
   erb :index
+end
+
+get '/about/?' do 
+  erb :about
 end
 
 error do
