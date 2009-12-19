@@ -28,7 +28,7 @@
 </div>
 <div id="footer">
   <span class="float_left">Everything here is copyright Ramanan Sivaranjan 2009.</span>
-  <% unless @page == 0 || @hide_nav %>
+  <% unless @page == 0 || @show_nav.nil? %>
   <span class="float_right">
      <% if @page > 1 %><a href="/page/<%= @page - 1 %>" class="prev_page">Prev</a> | <% end %>
      page <%= @page %> of <%= @config[:total_pages] %>
