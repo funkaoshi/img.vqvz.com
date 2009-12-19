@@ -4,13 +4,13 @@ require 'flickraw/lib/flickraw.rb'
 
 configure do
   CONF = YAML::load_file("conf.yml")
-  SETS = YAML::load_file("sets.yml")
-  SET_IDS = SETS.map { |name, set| set[:set_id] }
   CONF[:user_id] = flickr.people.findByUsername(:username => CONF[:user]).id
   user = flickr.people.getInfo(:user_id => CONF[:user_id])
   CONF[:total_pages] = user.photos.count.to_i / 10 + 1
   CONF[:flickr_profile] = user.profileurl
   CONF[:name] = user.realname
+  SETS = YAML::load_file("sets.yml")
+  SET_IDS = SETS.map { |name, set| set[:set_id] }
 end
 
 before do
@@ -56,6 +56,7 @@ helpers do
     @sequence = build_sequence(flickr.photos.search(params))
   end
 
+  # load all the photos in the given flickr set.
   def load_set(id)
     @page = 0
     @tag = id
@@ -64,6 +65,7 @@ helpers do
     @sequence = build_sequence(set_info.photo)
   end    
 
+  # build list of images.
   def build_sequence(photos)
     return [] if photos.nil?
     photos.map do |photo| 
@@ -106,6 +108,16 @@ end
 
 get '/about/?' do 
   erb :about
+end
+
+# load image from Flickr
+get %r{/photo/(\d+)} do |id|
+  info = flickr.photos.getInfo(:photo_id =>id)
+  sizes = flickr.photos.getSizes(:photo_id => id)
+  size = sizes.find { |s| s.label == 'Large' }
+  size ||= sizes.find { |s| s.label == 'Medium'}
+  @photo = Image.new(id, size.source, info.title, info.dates.taken[0..9])
+  erb :photo
 end
 
 error do
