@@ -83,39 +83,39 @@ end
 get '/' do
   load_images(1)
   @show_nav = true
-  erb :index
+  erubis :index
 end
 
 # loads the most recent photos from Flickr, offset by however many pages.
 get '/page/:num' do |page|
   load_images(page)
   @show_nav = true
-  erb :index
+  erubis :index
 end
 
 get '/sets' do
   @sets = SETS.map do |slug, set|
     FlickrSet.new(set[:set_id], set[:title], set[:thumbnail], slug)
   end
-  erb :sets
+  erubis :sets
 end
 
 get %r{/set/(\d+)} do |id|
   load_set(id)
-  erb :index
+  erubis :index
 end
 
 get '/set/:name' do |name|
   SETS[name].nil? ? load_images(0, "vqvz:set=#{name}") : load_set(SETS[name][:set_id])
-  erb :index
+  erubis :index
 end
 
 get '/about/?' do
-  erb :about
+  erubis :about
 end
 
 get '/news/?' do
-  erb :news
+  erubis :news
 end
 
 # load image from Flickr
@@ -125,11 +125,11 @@ get %r{/photo/(\d+)} do |id|
   size = sizes.find { |s| s.label == 'Large' }
   size ||= sizes.find { |s| s.label == 'Medium'}
   @photo = Image.new(id, size.source, info.title, info.dates.taken[0..9])
-  erb :photo
+  erubis :photo
 end
 
 not_found do
-  erb :error
+  erubis :error
 end
 
 error do

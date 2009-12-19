@@ -9,7 +9,7 @@
 </head>
 
 <body>
-<%= erb(:_gallery_banner, :layout => false) %>
+<%= erubis(:_gallery_banner, :layout => false) %>
 <div id="content">
     <div id="header">
         <h2>Sets</h2>
@@ -26,7 +26,7 @@
     <p style="color:gray;margin-top:5em">Everything here is copyright Ramanan Sivaranjan 2009.</p>
     </div>
 </div>
-<%= erb(:_google_analytics, :layout => false) %>
+<%= erubis(:_google_analytics, :layout => false) %>
 </body>
 
 </html>

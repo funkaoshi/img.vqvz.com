@@ -15,7 +15,7 @@
 <!-- user - <%= @config[:user] %> | id - <%= @config[:user_id] %> | tag - <%= @tag %> | page - <%= @page %> -->
 
 <body>
-<%= erb(:_gallery_banner, :layout => false) %>
+<%= erubis(:_gallery_banner, :layout => false) %>
 <div id="content">
     <div id="header">
         <h2><%= @config[:description] %></h2>
@@ -37,7 +37,7 @@
   <% end %>
   &nbsp;
 </div>
-<%= erb(:_google_analytics, :layout => false) %>
+<%= erubis(:_google_analytics, :layout => false) %>
 </body>
 
 </html>

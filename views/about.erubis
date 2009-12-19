@@ -8,7 +8,7 @@
 </head>
 
 <body>
-<%= erb(:_gallery_banner, :layout => false) %>
+<%= erubis(:_gallery_banner, :layout => false) %>
 <div id="content">
     <div id="header">
        <h2>About</h2>
@@ -17,7 +17,7 @@
        <%= @config[:about] %>
     </div>
 </div>
-<%= erb(:_google_analytics, :layout => false) %>
+<%= erubis(:_google_analytics, :layout => false) %>
 </body>
 
 </html>
