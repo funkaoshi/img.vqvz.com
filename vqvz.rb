@@ -100,13 +100,13 @@ get '/sets' do
   erb :sets
 end
 
-get '/set/:name' do |name|
-  SETS[name].nil? ? load_images(0, "vqvz:set=#{name}") : load_set(SETS[name][:set_id])
+get %r{/set/(\d+)} do |id|
+  load_set(id)
   erb :index
 end
 
-get %r{/set/(\d+)} do |id|
-  load_set(id)
+get '/set/:name' do |name|
+  SETS[name].nil? ? load_images(0, "vqvz:set=#{name}") : load_set(SETS[name][:set_id])
   erb :index
 end
 
