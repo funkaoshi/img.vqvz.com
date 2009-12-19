@@ -2,6 +2,31 @@ require 'sinatra'
 require 'erubis'
 require 'flickraw/lib/flickraw.rb'
 
+# Some basic information about an image (on Flickr)
+class Image
+  attr_accessor :id, :img_url, :flickr_url, :title, :date
+  
+  def initialize(id, img_url,title, date)
+    @id, @img_url, @title, @date = id, img_url, title, date
+    @flickr_url = "http://flickr.com/photos/#{CONF[:user]}/#{id}"
+  end
+end
+
+# basic information about a set
+class FlickrSet
+  attr_accessor :id, :title, :thumbnail, :slug
+  
+  def slug
+    @slug ||= @title.downcase.gsub(/[^a-z0-9_]/, '-')
+  end
+  
+  def initialize(id, title, thumbnail, slug = nil)
+    @id, @title, @thumbnail, @slug = id, title, thumbnail, slug
+  end
+end
+
+# Sinatra !!
+
 configure do
   CONF = YAML::load_file("conf.yml")
   CONF[:user_id] = flickr.people.findByUsername(:username => CONF[:user]).id
@@ -9,36 +34,12 @@ configure do
   CONF[:total_pages] = user.photos.count.to_i / 10 + 1
   CONF[:flickr_profile] = user.profileurl
   CONF[:name] = user.realname
-
   SETS = YAML::load_file("sets.yml")
   SET_IDS = SETS.map { |name, set| set[:set_id] }
 end
 
 before do
   @config = CONF
-end
-
-# Some basic information about an image (on Flickr)
-class Image
-  attr_accessor :id, :img_url, :flickr_url, :title, :date
-  def initialize(id, img_url,title, date)
-    @id = id
-    @img_url = img_url
-    @flickr_url = "http://flickr.com/photos/#{CONF[:user]}/#{id}"
-    @title = title
-    @date = date
-  end
-end
-
-# basic information about a set
-class FlickrSet
-  attr_accessor :id, :title, :thumbnail, :slug
-  def slug
-    @slug ||= @title.downcase.gsub(/[^a-z0-9_]/, '-')
-  end
-  def initialize(id, title, thumbnail, slug = nil)
-    @id, @title, @thumbnail, @slug = id, title, thumbnail, slug
-  end
 end
 
 helpers do
@@ -92,9 +93,11 @@ get '/page/:num' do |page|
   erb :index
 end
 
-get %r{/set/(\d+)} do |id|
-  load_set(id)
-  erb :index
+get '/sets' do
+  @sets = SETS.map do |slug, set|
+    FlickrSet.new(set[:set_id], set[:title], set[:thumbnail], slug)
+  end
+  erb :sets
 end
 
 get '/set/:name' do |name|
@@ -102,11 +105,9 @@ get '/set/:name' do |name|
   erb :index
 end
 
-get '/sets' do
-  @sets = SETS.map do |slug, set|
-    FlickrSet.new(set[:set_id], set[:title], set[:thumbnail], slug)
-  end
-  erb :sets
+get %r{/set/(\d+)} do |id|
+  load_set(id)
+  erb :index
 end
 
 get '/about/?' do
@@ -125,6 +126,10 @@ get %r{/photo/(\d+)} do |id|
   size ||= sizes.find { |s| s.label == 'Medium'}
   @photo = Image.new(id, size.source, info.title, info.dates.taken[0..9])
   erb :photo
+end
+
+not_found do
+  erb :error
 end
 
 error do
