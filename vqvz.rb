@@ -9,6 +9,7 @@ configure do
   CONF[:total_pages] = user.photos.count.to_i / 10 + 1
   CONF[:flickr_profile] = user.profileurl
   CONF[:name] = user.realname
+
   SETS = YAML::load_file("sets.yml")
   SET_IDS = SETS.map { |name, set| set[:set_id] }
 end
@@ -39,7 +40,7 @@ class FlickrSet
     @id, @title, @thumbnail, @slug = id, title, thumbnail, slug
   end
 end
-  
+
 helpers do
   # Loads 10 images from Flickr, offset by however many pages.
   # If :tag is specified in the conf file, we filter by that
@@ -63,12 +64,12 @@ helpers do
     params = { :user_id => CONF[:user_id], :extras => 'date_taken', :photoset_id => id }
     set_info = flickr.photosets.getPhotos(params)
     @sequence = build_sequence(set_info.photo)
-  end    
+  end
 
   # build list of images.
   def build_sequence(photos)
     return [] if photos.nil?
-    photos.map do |photo| 
+    photos.map do |photo|
       sizes = flickr.photos.getSizes(:photo_id => photo.id)
       size = sizes.find { |s| s.label == 'Large' }
       size ||= sizes.find { |s| s.label == 'Medium'}
@@ -76,7 +77,7 @@ helpers do
     end
   end
 end
-    
+
 # loads the most recent photos from Flickr
 get '/' do
   load_images(1)
@@ -99,15 +100,19 @@ get '/set/:name' do |name|
   erb :index
 end
 
-get '/sets' do 
+get '/sets' do
   @sets = SETS.map do |slug, set|
     FlickrSet.new(set[:set_id], set[:title], set[:thumbnail], slug)
   end
   erb :sets
 end
 
-get '/about/?' do 
+get '/about/?' do
   erb :about
+end
+
+get '/news/?' do
+  erb :news
 end
 
 # load image from Flickr

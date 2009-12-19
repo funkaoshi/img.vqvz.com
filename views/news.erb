@@ -1,0 +1,42 @@
+<!DOCTYPE HTML>
+<html lang=en>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+  <title>IMG VQVZ :: NEWS</title>
+  <link rel="stylesheet" href="/css/vqvz.css"
+    type="text/css" media="screen" title="default style sheet" charset="utf-8" />
+</head>
+
+<body>
+<div id="gallery-banner">
+	<table cellspacing="0" cellpadding="0"><tr>
+		<td><h1><a href="http://funkaoshi.com/">A Funkaoshi Production</a> presents <a href="/">IMG VQVZ</a>.</h1></td>
+		<td align="right">What's Here: <a href="/">Home</a> | <a href="/about">About</a> | <a href="/sets">Sets</a></td>
+    </tr></table>
+</div>
+<div id="content">
+    <div id="header">
+       <h2>News</h2>
+    </div>
+    <div class="photo" id="news">
+       <p><a href="http://www.flickr.com/photos/funkaoshi/4051680550/" title="Untitled by funkaoshi, on Flickr"><img src="http://farm3.static.flickr.com/2801/4051680550_c313a48928.jpg" width="500" height="333" alt="" /></a></p>
+       <p><span class="date">2009-12-19:</span> I've added a sets page, which will showcase selections of images that are hopefully good. You can view any of my flickr sets on this site by simply attaching the set id to the end of the url <code>http://img.vqvz.com/set/</code>; for example <a href="http://img.vqvz.com/set/72157622190121983">http://img.vqvz.com/set/72157622190121983</a>. Similarly, you can view any of my individual photos on this site by adding the photo id to the end of the url <code>http://img.vqvz.com/photo/</code>; for example, <a href="http://img.vqvz.com/photo/4196875012">http://img.vqvz.com/photo/4196875012</a>. I've added this little news page to write about changes to the site.</p>
+       <p><span class="date">2009-12-17:</span> The site is up and running, more or less. You can read up on some of the background for this site on the <a href="/about">about</a> page, or on <a href="http://funkaoshi.com/blog/img-vqvz">a longer post I wrote at a funkaoshi production</a>.</p>
+       <p style="color:gray;margin-top:5em">Everything here is copyright Ramanan Sivaranjan 2009.</p>
+    </div>
+</div>
+<% unless @config[:analytics].nil? %>
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try {
+   var pageTracker = _gat._getTracker("<%= @config[:analytics] %>");
+   pageTracker._trackPageview();
+} catch(err) {}</script>
+<% end %>
+</body>
+
+</html>
