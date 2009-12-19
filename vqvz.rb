@@ -81,12 +81,14 @@ end
 # loads the most recent photos from Flickr
 get '/' do
   load_images(1)
+  @show_nav = true
   erb :index
 end
 
 # loads the most recent photos from Flickr, offset by however many pages.
 get '/page/:num' do |page|
   load_images(page)
+  @show_nav = true
   erb :index
 end
 

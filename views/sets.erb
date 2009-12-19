@@ -9,12 +9,7 @@
 </head>
 
 <body>
-<div id="gallery-banner">
-	<table cellspacing="0" cellpadding="0"><tr>
-		<td><h1><a href="http://funkaoshi.com/">A Funkaoshi Production</a> presents <a href="/">IMG VQVZ</a>.</h1></td>
-		<td align="right">What's Here: <a href="/">Home</a> | <a href="/about">About</a> | <a href="/sets">Sets</a></td>
-    </tr></table>
-</div>
+<%= erb(:_gallery_banner, :layout => false) %>
 <div id="content">
     <div id="header">
         <h2>Sets</h2>
@@ -31,15 +26,7 @@
     <p style="color:gray;margin-top:5em">Everything here is copyright Ramanan Sivaranjan 2009.</p>
     </div>
 </div>
-<script type="text/javascript">
-var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
-</script>
-<script type="text/javascript">
-try {
-   var pageTracker = _gat._getTracker("UA-2675737-7");
-   pageTracker._trackPageview();
-} catch(err) {}</script>
+<%= erb(:_google_analytics, :layout => false) %>
 </body>
 
 </html>
