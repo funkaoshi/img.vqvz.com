@@ -128,10 +128,14 @@ get %r{/photo/(\d+)} do |id|
   erubis :photo
 end
 
-not_found do
-  erubis :error
-end
+# Error Handlers in Production
 
-error do
-  'Sorry there was a nasty error - ' + request.env['sinatra.error'].name
+configure :production do
+  not_found do
+    "We're so sorry, but we don't what this is"
+  end
+
+  error do
+    "Something really nasty happened.  We're on it!"
+  end
 end
