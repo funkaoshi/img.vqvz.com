@@ -1,5 +1,5 @@
-require 'vendor/sinatra/lib/sinatra.rb'
-require 'vendor/flickraw/lib/flickraw.rb'
+require File.dirname(__FILE__) + '/vendor/sinatra/lib/sinatra.rb'
+require File.dirname(__FILE__) + '/vendor/flickraw/lib/flickraw.rb'
 require 'erubis'
 
 # Some basic information about an image (on Flickr)
@@ -28,12 +28,12 @@ end
 # Sinatra !!
 
 configure do
-  CONF = YAML::load_file("conf.yml")
+  CONF = YAML::load_file(File.dirname(__FILE__) + '/conf.yml')
   CONF[:user_id] = flickr.people.findByUsername(:username => CONF[:user]).id
   user = flickr.people.getInfo(:user_id => CONF[:user_id])
   CONF[:flickr_profile] = user.profileurl
   CONF[:name] = user.realname
-  SETS = YAML::load_file("sets.yml")
+  SETS = YAML::load_file(File.dirname(__FILE__) + '/sets.yml')
   SET_IDS = SETS.map { |name, set| set[:set_id] }
 end
 
