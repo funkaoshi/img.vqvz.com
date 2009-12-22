@@ -1,8 +1,3 @@
-ENV['GEM_HOME'] = '/home/ramanan/local/gems'
-ENV['GEM_PATH'] = '$GEM_HOME:/usr/lib/ruby/gems/1.8'  
-require 'rubygems'
-Gem.clear_paths
-
 require 'rack/cache'
 require 'vendor/sinatra/lib/sinatra.rb'
 
