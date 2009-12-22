@@ -56,7 +56,7 @@ helpers do
     params[:page] = page unless page == 0
     photos = flickr.photos.search(params)
     @pages = photos.pages
-    @sequence = build_sequence(phots)
+    @sequence = build_sequence(photos)
   end
 
   # load all the photos in the given flickr set.
