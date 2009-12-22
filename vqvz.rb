@@ -1,5 +1,5 @@
-require 'vendor/sinatra/lib/sinatra.rb'
-require 'vendor/flickraw/lib/flickraw.rb'
+require 'sinatra'
+require 'flickraw'
 require 'erubis'
 
 # Some basic information about an image (on Flickr)
