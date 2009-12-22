@@ -38,6 +38,7 @@ configure do
 end
 
 before do
+  expires 86400, :public, :must_revalidate
   @config = CONF
 end
 
@@ -133,10 +134,10 @@ end
 
 configure :production do
   not_found do
-    "We're so sorry, but we don't what this is"
+    erubis :error
   end
 
   error do
-    "Something really nasty happened.  We're on it!"
+    erubis :error
   end
 end
