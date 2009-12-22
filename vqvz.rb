@@ -31,7 +31,6 @@ configure do
   CONF = YAML::load_file("conf.yml")
   CONF[:user_id] = flickr.people.findByUsername(:username => CONF[:user]).id
   user = flickr.people.getInfo(:user_id => CONF[:user_id])
-  CONF[:total_pages] = user.photos.count.to_i / 10 + 1
   CONF[:flickr_profile] = user.profileurl
   CONF[:name] = user.realname
   SETS = YAML::load_file("sets.yml")
@@ -69,6 +68,7 @@ helpers do
 
   # build list of images.
   def build_sequence(photos)
+    @pages = photos.pages
     return [] if photos.nil?
     photos.map do |photo|
       sizes = flickr.photos.getSizes(:photo_id => photo.id)

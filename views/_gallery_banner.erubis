@@ -8,7 +8,7 @@
         <% unless @page == 0 || @show_nav.nil? %>
         &nbsp; &nbsp; Look Around: <% if @page > 1 %><a href="/page/<%= @page - 1 %>" class="prev_page">Prev</a><% else %>Prev<% end %>
         | <a href="/">Home</a> | 
-        <% if @page < @config[:total_pages] %><a href="/page/<%= @page + 1 %>" class="next_page">Next</a><% else %>Next<% end %>
+        <% if @page < @pages %><a href="/page/<%= @page + 1 %>" class="next_page">Next</a><% else %>Next<% end %>
         <% end %>
     </td>
     </tr></table>
