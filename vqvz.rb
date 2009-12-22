@@ -54,7 +54,9 @@ helpers do
     params[:machine_tags] = tag unless tag.nil?
     params[:per_page] = 10 unless page == 0
     params[:page] = page unless page == 0
-    @sequence = build_sequence(flickr.photos.search(params))
+    photos = flickr.photos.search(params)
+    @pages = photos.pages
+    @sequence = build_sequence(phots)
   end
 
   # load all the photos in the given flickr set.
@@ -68,7 +70,6 @@ helpers do
 
   # build list of images.
   def build_sequence(photos)
-    @pages = photos.pages
     return [] if photos.nil?
     photos.map do |photo|
       sizes = flickr.photos.getSizes(:photo_id => photo.id)
