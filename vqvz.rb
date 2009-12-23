@@ -38,7 +38,7 @@ configure do
 end
 
 before do
-  expires 86400, :public, :must_revalidate
+  expires 600, :public, :must_revalidate
   @config = CONF
 end
 
