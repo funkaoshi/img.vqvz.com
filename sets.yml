@@ -1,4 +1,12 @@
 ---
+  ago:
+    :set_id: 72157622414990639
+    :title: AGO Shapes
+    :thumbnail: http://farm3.static.flickr.com/2618/4193675889_bbb58a8cc1_s.jpg
+  australia:
+    :set_id: 72157608179191804
+    :title: Australia 2008
+    :thumbnail: http://farm4.static.flickr.com/3275/2980366654_040d5e3ac0_s.jpg
   blansdowne: 
     :set_id: 72157619603386788
     :title: Blansdowne
@@ -7,9 +15,15 @@
     :set_id: 72157608502514724
     :title: Birds
     :thumbnail: http://farm4.static.flickr.com/3124/2850149542_e7ff883639_s.jpg
+  portraits:
+    :set_id: 72157614348062619
+    :title: People / Portraits
+    :thumbnail: http://farm3.static.flickr.com/2597/4191380555_16e8c1dce3_s.jpg
   subdivision: 
     :set_id: 72157614920778997
     :title: The Subdivision
     :thumbnail: http://farm4.static.flickr.com/3372/3339102255_9593ac4c70_s.jpg
- 
-
+  uk:
+    :set_id: 72157616692326569
+    :title: UK 2009
+    :thumbnail: http://farm4.static.flickr.com/3606/3443495972_91146cd80b_s.jpg
