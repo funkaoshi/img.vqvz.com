@@ -1,0 +1,14 @@
+!!! 5
+%html
+  %head
+    %meta(http-equiv="Content-Type" content="text/html; charset=utf-8")
+    %title== #{@config[:title]} :: ABOUT ::
+    %link(rel="stylesheet" href="/css/vqvz.css" type="text/css" media="screen" title="default style sheet" charset="utf-8")
+  %body
+    = erubis(:_gallery_banner, :layout => false)
+    #content
+      #header
+        %h2 About
+      #about.photo
+        = @config[:about]
+    = erubis(:_google_analytics, :layout => false)

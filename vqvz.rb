@@ -1,6 +1,7 @@
 require File.dirname(__FILE__) + '/vendor/sinatra/lib/sinatra.rb'
 require File.dirname(__FILE__) + '/vendor/flickraw/lib/flickraw.rb'
 require 'erubis'
+require 'haml'
 
 # Some basic information about an image (on Flickr)
 class Image
@@ -113,11 +114,11 @@ get '/set/:name' do |name|
 end
 
 get '/about/?' do
-  erubis :about
+  haml :about
 end
 
 get '/news/?' do
-  erubis :news
+  haml :news
 end
 
 # load image from Flickr
