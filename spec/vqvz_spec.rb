@@ -53,11 +53,23 @@ describe 'IMG VQVZ' do
     # photo of shima on Flickr
     get '/photo/4196874052'
     last_response.should be_ok
-    last_response.body.should match(/<h2>Shima<\/h2>/)
+    last_response.body.should match('<h2>Shima<\/h2>')    
   end
 
   it 'should return a 404 on an error' do
     get '/404'
     last_response.status.should == 404
+  end
+
+  # assumes we have at least 2 pages worth of photos
+  it 'should let you move forward and back via page links' do
+    visit '/'
+    last_response.should be_ok
+    click_link 'next'
+    last_response.should be_ok
+    last_request.url.should == 'http://example.org/page/2'
+    click_link 'prev'
+    last_response.should be_ok
+    last_request.url.should == 'http://example.org/'
   end
 end
