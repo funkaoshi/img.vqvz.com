@@ -1,13 +1,18 @@
-require 'rubygems'
+require File.join(File.dirname(__FILE__), '..', 'vqvz.rb')
+
 require 'rack/test'
 require 'spec'
-require 'spec/autorun'
 require 'spec/interop/test'
-
-require File.join(File.dirname(__FILE__), '..', 'vqvz.rb')
 
 # set test environment
 set :environment, :test
-set :run, false
-set :raise_errors, true
-set :logging, false
+
+# attach rack test methods to each test case block
+class Test::Unit::TestCase
+  include Rack::Test::Methods
+end
+
+def app
+  @app ||= Sinatra::Application
+end
+
