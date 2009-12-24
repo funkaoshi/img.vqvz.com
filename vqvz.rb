@@ -127,14 +127,6 @@ get '/set/:name' do |name|
   haml :index
 end
 
-get '/about/?' do
-  haml :about
-end
-
-get '/news/?' do
-  haml :news
-end
-
 # load image from Flickr
 get %r{/photo/(\d+)} do |id|
   info = flickr.photos.getInfo(:photo_id =>id)
@@ -145,14 +137,19 @@ get %r{/photo/(\d+)} do |id|
   haml :photo
 end
 
+get '/:name' do |@name|
+  halt 404 unless File.exists?(File.dirname(__FILE__) + "/views/_#{@name}.haml")
+  haml :simple
+end
+
 # Error Handlers in Production
 
-configure :production do
-  not_found do
-    haml :error
-  end
+not_found do
+  @name = 'WTF'
+  haml :simple
+end
 
-  error do
-    haml :error
-  end
+error do
+  @name = 'WTF'
+  haml :simple
 end
