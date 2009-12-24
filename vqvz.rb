@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + '/vendor/sinatra/lib/sinatra.rb'
 require File.dirname(__FILE__) + '/vendor/flickraw/lib/flickraw.rb'
-require 'erubis'
+require 'haml'
 
 # Some basic information about an image (on Flickr)
 class Image
@@ -38,7 +38,7 @@ configure do
 end
 
 before do
-  expires 600, :public, :must_revalidate
+  #expires 600, :public, :must_revalidate
   @config = CONF
 end
 
@@ -79,45 +79,60 @@ helpers do
       Image.new(photo.id, size.source, photo.title, photo.datetaken[0..9])
     end
   end
+  
+  def prev_link
+    case
+    when @page <= 1
+      "Prev"
+    when @page == 2
+      "<a href=\"/\" class=\"prev_page\">Prev</a>"
+    else
+      "<a href=\"/page/#{@page - 1}\" class=\"prev_page\">Prev</a>"
+    end
+  end
+  
+  def next_link
+    @page >= @pages ? "Next" : "<a href=\"/page/#{@page + 1}\" class=\"next_page\">Next</a>"
+  end
 end
 
 # loads the most recent photos from Flickr
 get '/' do
   load_images(1)
   @show_nav = true
-  erubis :index
+  haml :index
 end
 
 # loads the most recent photos from Flickr, offset by however many pages.
 get '/page/:num' do |page|
   load_images(page)
   @show_nav = true
-  erubis :index
+  haml :index
 end
 
 get '/sets' do
   @sets = SETS.map do |slug, set|
     FlickrSet.new(set[:set_id], set[:title], set[:thumbnail], slug)
   end
-  erubis :sets
+  haml :sets
 end
 
 get %r{/set/(\d+)} do |id|
   load_set(id)
-  erubis :index
+  haml :index
 end
 
 get '/set/:name' do |name|
   SETS[name].nil? ? load_images(0, "vqvz:set=#{name}") : load_set(SETS[name][:set_id])
-  erubis :index
+  haml :index
 end
 
 get '/about/?' do
-  erubis :about
+  haml :about
 end
 
 get '/news/?' do
-  erubis :news
+  haml :news
 end
 
 # load image from Flickr
@@ -127,17 +142,17 @@ get %r{/photo/(\d+)} do |id|
   size = sizes.find { |s| s.label == 'Large' }
   size ||= sizes.find { |s| s.label == 'Medium'}
   @photo = Image.new(id, size.source, info.title, info.dates.taken[0..9])
-  erubis :photo
+  haml :photo
 end
 
 # Error Handlers in Production
 
 configure :production do
   not_found do
-    erubis :error
+    haml :error
   end
 
   error do
-    erubis :error
+    haml :error
   end
 end

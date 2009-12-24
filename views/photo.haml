@@ -1,0 +1,16 @@
+!!! 5
+%html
+  %head
+    %meta(http-equiv="Content-Type" content="text/html; charset=utf-8")
+    %title #{@config[:title]} :: #{@photo.title}
+    %link(rel="stylesheet" href="/css/vqvz.css" type="text/css" media="screen" title="default style sheet" charset="utf-8")
+  %body
+    = haml(:_gallery_banner, :layout => false)
+    #content
+      #header
+        %h2= @photo.title
+      .photo.hentry{:id => @photo.id}
+        %a{:href => @photo.flickr_url}
+          %img{:src => @photo.img_url}>
+        %p(style="color:gray;margin-top:5em") Everything here is copyright Ramanan Sivaranjan 2009.
+    = haml(:_google_analytics, :layout => false)
