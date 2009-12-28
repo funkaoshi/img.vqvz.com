@@ -2,18 +2,18 @@
 %html
   %head
     %meta(http-equiv="Content-Type" content="text/html; charset=utf-8")
-    %title= @config[:title]
+    %title= @@CONF[:title]
     %link(rel="stylesheet" href="/css/vqvz.css" type="text/css" media="screen" title="default style sheet" charset="utf-8")
     %link(rel="stylesheet" href="/css/paging_keys.css" type="text/css" media="screen" title="paging keys css" charset="utf-8")
     %script(type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js")
     %script(type="text/javascript" src="/js/paging_keys.js")
   / 
-    user - #{@config[:user]} | id - #{@config[:user_id]} | tag - #{@tag} | page - #{@page}
+    user - #{@@CONF[:user]} | id - #{@@CONF[:user_id]} | tag - #{@tag} | page - #{@page}
   %body
     = haml(:_gallery_banner, :layout => false)
     #content
       #header
-        %h2= @config[:description]
+        %h2= @@CONF[:description]
       - @sequence.each do |img|
         .photo.hentry{:id => img.id}
           %a{:href => img.flickr_url}
@@ -22,4 +22,4 @@
       %span.float_left Everything here is copyright Ramanan Sivaranjan 2009.
       - unless @page == 0 || @show_nav.nil?
         %span.float_right #{prev_link} | Page #{@page} of #{@pages} | #{next_link}
-    = haml(:_google_analytics, :layout => false)
+    = haml(:_trailer, :layout => false)

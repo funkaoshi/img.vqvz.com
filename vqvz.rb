@@ -8,7 +8,7 @@ class Image
   
   def initialize(id, img_url,title, date)
     @id, @img_url, @title, @date = id, img_url, title, date
-    @flickr_url = "http://flickr.com/photos/#{CONF[:user]}/#{id}"
+    @flickr_url = "http://flickr.com/photos/#{@@CONF[:user]}/#{id}"
   end
 end
 
@@ -28,18 +28,18 @@ end
 # Sinatra !!
 
 configure do
-  CONF = YAML::load_file(File.dirname(__FILE__) + '/conf.yml')
-  CONF[:user_id] = flickr.people.findByUsername(:username => CONF[:user]).id
-  user = flickr.people.getInfo(:user_id => CONF[:user_id])
-  CONF[:flickr_profile] = user.profileurl
-  CONF[:name] = user.realname
-  SETS = YAML::load_file(File.dirname(__FILE__) + '/sets.yml')
-  SET_IDS = SETS.map { |name, set| set[:set_id] }
+  @@CONF = YAML::load_file(File.dirname(__FILE__) + '/conf.yml')
+  @@CONF[:user_id] = flickr.people.findByUsername(:username => @@CONF[:user]).id
+  user = flickr.people.getInfo(:user_id => @@CONF[:user_id])
+  @@CONF[:flickr_profile] = user.profileurl
+  @@CONF[:name] = user.realname
+  @@SETS = YAML::load_file(File.dirname(__FILE__) + '/sets.yml')
+  @@SET_IDS = @@SETS.map { |name, set| set[:set_id] }
+  @@last_mod_time = Time.now
 end
 
 before do
-  #expires 600, :public, :must_revalidate
-  @config = CONF
+  last_modified(@@last_mod_time) unless request.path_info == '/update/now'
 end
 
 helpers do
@@ -50,8 +50,8 @@ helpers do
   def load_images(page, tag=nil)
     @page = page.to_i
     @tag = tag
-    params = { :user_id => CONF[:user_id], :extras => 'date_taken' }
-    params[:machine_tags] = CONF[:tag] unless CONF[:tag].nil?
+    params = { :user_id => @@CONF[:user_id], :extras => 'date_taken' }
+    params[:machine_tags] = @@CONF[:tag] unless @@CONF[:tag].nil?
     params[:machine_tags] = tag unless tag.nil?
     params[:per_page] = 10 unless page == 0
     params[:page] = page unless page == 0
@@ -64,7 +64,7 @@ helpers do
   def load_set(id)
     @page = 0
     @tag = id
-    params = { :user_id => CONF[:user_id], :extras => 'date_taken', :photoset_id => id }
+    params = { :user_id => @@CONF[:user_id], :extras => 'date_taken', :photoset_id => id }
     set_info = flickr.photosets.getPhotos(params)
     @sequence = build_sequence(set_info.photo)
   end
@@ -111,7 +111,7 @@ get '/page/:num' do |page|
 end
 
 get '/sets' do
-  @sets = SETS.map do |slug, set|
+  @sets = @@SETS.map do |slug, set|
     FlickrSet.new(set[:set_id], set[:title], set[:thumbnail], slug)
   end
   haml :sets
@@ -123,7 +123,7 @@ get %r{/set/(\d+)} do |id|
 end
 
 get '/set/:name' do |name|
-  SETS[name].nil? ? load_images(0, "vqvz:set=#{name}") : load_set(SETS[name][:set_id])
+  @@SETS[name].nil? ? load_images(0, "vqvz:set=#{name}") : load_set(@@SETS[name][:set_id])
   haml :index
 end
 
@@ -140,6 +140,10 @@ end
 get '/:name' do |@name|
   halt 404 unless File.exists?(File.dirname(__FILE__) + "/views/_#{@name}.haml")
   haml :simple
+end
+
+get '/update/now' do
+  @@last_mod_time = Time.now
 end
 
 # Error Handlers in Production
