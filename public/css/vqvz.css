@@ -73,7 +73,7 @@ body {
 
 /* Other Pages */
 
-#about, #news {
+.simple-page {
     width:500px;
 }
 

@@ -9,7 +9,7 @@
     #content
       #header
         %h2= @name.capitalize
-      #about.photo
+      .simple-page.photo{:id => "#{@name}"}
         = haml("_#{@name}".to_sym, :layout => false)
         %p(style="color:gray;margin-top:5em") Everything here is copyright Ramanan Sivaranjan 2009.
     = haml(:_google_analytics, :layout => false)
