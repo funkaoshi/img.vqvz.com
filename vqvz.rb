@@ -1,6 +1,6 @@
-require 'sinatra'
-require 'flickraw'
-require 'erubis'
+require File.dirname(__FILE__) + '/vendor/sinatra/lib/sinatra.rb'
+require File.dirname(__FILE__) + '/vendor/flickraw/lib/flickraw.rb'
+require 'haml'
 
 # Some basic information about an image (on Flickr)
 class Image
@@ -28,17 +28,17 @@ end
 # Sinatra !!
 
 configure do
-  CONF = YAML::load_file("conf.yml")
+  CONF = YAML::load_file(File.dirname(__FILE__) + '/conf.yml')
   CONF[:user_id] = flickr.people.findByUsername(:username => CONF[:user]).id
   user = flickr.people.getInfo(:user_id => CONF[:user_id])
   CONF[:flickr_profile] = user.profileurl
   CONF[:name] = user.realname
-  SETS = YAML::load_file("sets.yml")
+  SETS = YAML::load_file(File.dirname(__FILE__) + '/sets.yml')
   SET_IDS = SETS.map { |name, set| set[:set_id] }
 end
 
 before do
-  expires 86400, :public, :must_revalidate
+  #expires 600, :public, :must_revalidate
   @config = CONF
 end
 
@@ -79,45 +79,52 @@ helpers do
       Image.new(photo.id, size.source, photo.title, photo.datetaken[0..9])
     end
   end
+  
+  def prev_link
+    case
+    when @page <= 1
+      "Prev"
+    when @page == 2
+      "<a href=\"/\" class=\"prev_page\">Prev</a>"
+    else
+      "<a href=\"/page/#{@page - 1}\" class=\"prev_page\">Prev</a>"
+    end
+  end
+  
+  def next_link
+    @page >= @pages ? "Next" : "<a href=\"/page/#{@page + 1}\" class=\"next_page\">Next</a>"
+  end
 end
 
 # loads the most recent photos from Flickr
 get '/' do
   load_images(1)
   @show_nav = true
-  erubis :index
+  haml :index
 end
 
 # loads the most recent photos from Flickr, offset by however many pages.
 get '/page/:num' do |page|
   load_images(page)
   @show_nav = true
-  erubis :index
+  haml :index
 end
 
 get '/sets' do
   @sets = SETS.map do |slug, set|
     FlickrSet.new(set[:set_id], set[:title], set[:thumbnail], slug)
   end
-  erubis :sets
+  haml :sets
 end
 
 get %r{/set/(\d+)} do |id|
   load_set(id)
-  erubis :index
+  haml :index
 end
 
 get '/set/:name' do |name|
   SETS[name].nil? ? load_images(0, "vqvz:set=#{name}") : load_set(SETS[name][:set_id])
-  erubis :index
-end
-
-get '/about/?' do
-  erubis :about
-end
-
-get '/news/?' do
-  erubis :news
+  haml :index
 end
 
 # load image from Flickr
@@ -127,17 +134,22 @@ get %r{/photo/(\d+)} do |id|
   size = sizes.find { |s| s.label == 'Large' }
   size ||= sizes.find { |s| s.label == 'Medium'}
   @photo = Image.new(id, size.source, info.title, info.dates.taken[0..9])
-  erubis :photo
+  haml :photo
+end
+
+get '/:name' do |@name|
+  halt 404 unless File.exists?(File.dirname(__FILE__) + "/views/_#{@name}.haml")
+  haml :simple
 end
 
 # Error Handlers in Production
 
-configure :production do
-  not_found do
-    erubis :error
-  end
+not_found do
+  @name = 'WTF'
+  haml :simple
+end
 
-  error do
-    erubis :error
-  end
+error do
+  @name = 'WTF'
+  haml :simple
 end

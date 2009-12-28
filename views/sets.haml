@@ -1,0 +1,22 @@
+!!! 5
+%html
+  %head
+    %meta(http-equiv="Content-Type" content="text/html; charset=utf-8")
+    %title #{@config[:title]} :: SETS
+    %link(rel="stylesheet" href="/css/vqvz.css" type="text/css" media="screen" title="default style sheet" charset="utf-8")
+  %body
+    = haml(:_gallery_banner, :layout => false)
+    #content
+      #header
+        %h2 Sets
+      .photo
+        %table#sets
+          - @sets.each do |set|
+            %tr
+              %td
+                %a{:href => "/set/#{set.slug}"}>
+                  %img{:src => set.thumbnail}>
+              %td
+                %h3>= set.title
+        %p(style="color:gray;margin-top:5em") Everything here is copyright Ramanan Sivaranjan 2009.
+    = haml(:_google_analytics, :layout => false)
