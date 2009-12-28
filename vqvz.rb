@@ -1,5 +1,5 @@
 require File.dirname(__FILE__) + '/vendor/sinatra/lib/sinatra.rb'
-require File.dirname(__FILE__) + '/vendor/flickraw/lib/flickraw.rb'
+require 'flickraw'
 require 'haml'
 
 # Some basic information about an image (on Flickr)
