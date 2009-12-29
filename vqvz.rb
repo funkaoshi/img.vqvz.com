@@ -39,7 +39,10 @@ configure do
 end
 
 before do
-  last_modified(@@last_mod_time) unless request.path_info == '/update/now'
+  unless request.path_info =~ /update/
+    expires 300, :public, :must_revalidate  # always cache for 5 minutes ...
+    last_modified(@@last_mod_time)          # ... and rely on 304 query after that
+  end
 end
 
 helpers do
@@ -144,6 +147,10 @@ end
 
 get '/update/now' do
   @@last_mod_time = Time.now
+end
+
+get '/update/show' do
+  "Last-Update: #{@@last_mod_time}"
 end
 
 # Error Handlers in Production
