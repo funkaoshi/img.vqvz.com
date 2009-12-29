@@ -1,4 +1,5 @@
 erubis
 rack 
 rack-cache
-flickraw --version '>= 0.7.1'
+flickraw
+haml --version '>= 2.2.14'
