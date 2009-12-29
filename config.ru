@@ -3,7 +3,7 @@ Sinatra::Base.set(:run, false)
 Sinatra::Base.set(:env, :production);
 
 require 'rack/cache'
-use Rack::Cache
+use Rack::Cache,
     :verbose => true, 
     :metastore => "file:cache/meta", 
     :entitystore => "file:cache/body", 
