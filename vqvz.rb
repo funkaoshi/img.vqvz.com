@@ -28,13 +28,21 @@ end
 # Sinatra !!
 
 configure do
+  # use HTML5
+  set :haml, :format => :html5, :attr_wrapper  => '"'
+
+  # load up conf file
   @@CONF = YAML::load_file(File.dirname(__FILE__) + '/conf.yml')
   @@CONF[:user_id] = flickr.people.findByUsername(:username => @@CONF[:user]).id
   user = flickr.people.getInfo(:user_id => @@CONF[:user_id])
   @@CONF[:flickr_profile] = user.profileurl
   @@CONF[:name] = user.realname
+
+  # read sets file
   @@SETS = YAML::load_file(File.dirname(__FILE__) + '/sets.yml')
   @@SET_IDS = @@SETS.map { |name, set| set[:set_id] }
+
+  # set the last mod time to now, when the app starts up. Updated via /update/now
   @@last_mod_time = Time.now
 end
 
