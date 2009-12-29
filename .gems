@@ -1,3 +1,4 @@
 erubis
 rack 
+rack-cache
 flickraw --version '>= 0.7.1'
