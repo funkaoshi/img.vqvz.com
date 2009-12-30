@@ -1,9 +1,9 @@
 #gallery-banner
-  %table(cellspacing="0" cellpadding="0")
+  %table
     %tr
       %td
         %h1 <a href="http://funkaoshi.com/">A Funkaoshi Production</a> presents <a href="/">#{@@CONF[:title]}</a>
-      %td(align="right")
+      %td.right
         What's Here: <a href="/">Home</a> | <a href="/about">About</a> | <a href="/news">News</a> | <a href="/sets">Sets</a>
         - unless @page == 0 || @show_nav.nil?
           &nbsp; &nbsp; Look Around: #{prev_link} | <a href="/">Home</a> | #{next_link}

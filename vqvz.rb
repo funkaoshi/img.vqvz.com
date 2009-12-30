@@ -28,7 +28,7 @@ end
 # Sinatra !!
 
 configure do
-  # use HTML5
+  # use HTML5 when generating HTML
   set :haml, :format => :html5, :attr_wrapper  => '"'
 
   # load up conf file
@@ -86,7 +86,7 @@ helpers do
     photos.map do |photo|
       sizes = flickr.photos.getSizes(:photo_id => photo.id)
       size = sizes.find { |s| s.label == 'Large' }
-      size ||= sizes.find { |s| s.label == 'Medium'}
+      size ||= sizes.find { |s| s.label == 'Medium'} # pull medium image if large is missing
       Image.new(photo.id, size.source, photo.title, photo.datetaken[0..9])
     end
   end
