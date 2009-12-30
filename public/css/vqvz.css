@@ -38,10 +38,7 @@ body {
 
 #gallery-banner table {
     width:100%;
-    cellpadding:0;
-    cellspacing:0;
 }
-
 
 /* Header */
 
@@ -61,7 +58,6 @@ body {
 }
 
 .caption p {
-    text-align:left;
     color:gray;
 }
 
