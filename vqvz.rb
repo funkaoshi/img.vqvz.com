@@ -61,7 +61,7 @@ helpers do
   def load_images(page, tag=nil)
     @page = page.to_i
     @tag = tag
-    params = { :user_id => @@CONF[:user_id], :extras => 'date_taken' }
+    params = { :user_id => @@CONF[:user_id], :extras => 'date_taken, url_l' }
     params[:machine_tags] = @@CONF[:tag] unless @@CONF[:tag].nil?
     params[:machine_tags] = tag unless tag.nil?
     params[:per_page] = 10 unless page == 0
@@ -75,7 +75,7 @@ helpers do
   def load_set(id)
     @page = 0
     @tag = id
-    params = { :user_id => @@CONF[:user_id], :extras => 'date_taken', :photoset_id => id }
+    params = { :user_id => @@CONF[:user_id], :extras => 'date_taken, url_l', :photoset_id => id }
     set_info = flickr.photosets.getPhotos(params)
     @sequence = build_sequence(set_info.photo)
   end
@@ -84,10 +84,12 @@ helpers do
   def build_sequence(photos)
     return [] if photos.nil?
     photos.map do |photo|
-      sizes = flickr.photos.getSizes(:photo_id => photo.id)
-      size = sizes.find { |s| s.label == 'Large' }
-      size ||= sizes.find { |s| s.label == 'Medium'} # pull medium image if large is missing
-      Image.new(photo.id, size.source, photo.title, photo.datetaken[0..9])
+      src = unless photo.respond_to?(:url_l)
+        FlickRaw::url(photo)
+      else
+        photo.url_l
+      end
+      Image.new(photo.id, src, photo.title, photo.datetaken[0..9])
     end
   end
   
