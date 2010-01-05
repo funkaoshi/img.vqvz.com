@@ -6,7 +6,7 @@ require 'haml'
 class Image
   attr_accessor :id, :img_url, :flickr_url, :title, :date
   
-  def initialize(id, img_url,title, date)
+  def initialize(id, img_url, title, date)
     @id, @img_url, @title, @date = id, img_url, title, date
     @flickr_url = "http://flickr.com/photos/#{@@CONF[:user]}/#{id}"
   end
@@ -83,13 +83,15 @@ helpers do
   # build list of images.
   def build_sequence(photos)
     return [] if photos.nil?
-    photos.map do |photo|
-      src = unless photo.respond_to?(:url_l)
-        FlickRaw::url(photo)
-      else
-        photo.url_l
-      end
-      Image.new(photo.id, src, photo.title, photo.datetaken[0..9])
+    photos.map { |photo| Image.new(photo.id, img_url(photo), photo.title, photo.datetaken[0..9]) }
+  end
+  
+  # figure out flickr image url
+  def img_url(photo)
+    unless photo.respond_to?(:url_l)
+      FlickRaw::url(photo)
+    else
+      photo.url_l
     end
   end
   
@@ -123,6 +125,7 @@ get '/page/:num' do |page|
   haml :index
 end
 
+# get list of sets visibile at vqvz.
 get '/sets' do
   @sets = @@SETS.map do |slug, set|
     FlickrSet.new(set[:set_id], set[:title], set[:thumbnail], slug)
@@ -130,23 +133,22 @@ get '/sets' do
   haml :sets
 end
 
+# load set using Flickr set ID
 get %r{/set/(\d+)} do |id|
   load_set(id)
   haml :index
 end
 
+# load machine tag or local set name
 get '/set/:name' do |name|
   @@SETS[name].nil? ? load_images(0, "vqvz:set=#{name}") : load_set(@@SETS[name][:set_id])
   haml :index
 end
 
-# load image from Flickr
+# load a single image from Flickr
 get %r{/photo/(\d+)} do |id|
-  info = flickr.photos.getInfo(:photo_id =>id)
-  sizes = flickr.photos.getSizes(:photo_id => id)
-  size = sizes.find { |s| s.label == 'Large' }
-  size ||= sizes.find { |s| s.label == 'Medium'}
-  @photo = Image.new(id, size.source, info.title, info.dates.taken[0..9])
+  info = flickr.photos.getInfo(:photo_id =>id, :extras => 'url_l')
+  @photo = Image.new(id, img_url(info), info.title, info.dates.taken[0..9])
   haml :photo
 end
 
@@ -154,6 +156,8 @@ get '/:name' do |@name|
   halt 404 unless File.exists?(File.dirname(__FILE__) + "/views/_#{@name}.haml")
   haml :simple
 end
+
+# caching junk that probably doesn't work
 
 get '/update/now' do
   @@last_mod_time = Time.now
