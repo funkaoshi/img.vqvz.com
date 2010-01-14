@@ -147,8 +147,11 @@ end
 
 # load a single image from Flickr
 get %r{/photo/(\d+)} do |id|
-  info = flickr.photos.getInfo(:photo_id =>id, :extras => 'url_l')
-  @photo = Image.new(id, img_url(info), info.title, info.dates.taken[0..9])
+  info = flickr.photos.getInfo(:photo_id => id)
+  sizes = flickr.photos.getSizes(:photo_id => id)
+  img_url = sizes.find {|s| s.label == 'Large' }
+  img_url ||= sizes.find {|s| s.label == 'Medium' } # always exists
+  @photo = Image.new(id, img_url.source, info.title, info.dates.taken[0..9])
   haml :photo
 end
 
