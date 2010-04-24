@@ -1,8 +1,8 @@
 !!! 5
 %html
   %head
-    %meta(http-equiv="Content-Type" content="text/html; charset=utf-8")
-    %title #{@@CONF[:title]} :: SETS
+    = haml(:_meta, :layout => false)
+    %title #{@config.conf[:title]} :: SETS
     %link(rel="stylesheet" href="/css/vqvz.css" type="text/css" media="screen" title="default style sheet")
   %body
     = haml(:_gallery_banner, :layout => false)
