@@ -1,14 +1,31 @@
 require 'sinatra'
 require 'flickraw'
 require 'haml'
+require 'yaml'
 
 # Some basic information about an image (on Flickr)
 class Image
   attr_accessor :id, :img_url, :flickr_url, :title, :date
   
-  def initialize(id, img_url, title, date)
-    @id, @img_url, @title, @date = id, img_url, title, date
-    @flickr_url = "http://flickr.com/photos/#{@@CONF[:user]}/#{id}"
+  # figure out flickr image url
+  def get_img_url(photo)
+    unless photo.respond_to?(:url_l)
+      FlickRaw::url(photo)
+    else
+      photo.url_l
+    end
+  end
+  
+  def initialize(photo, url=nil)
+    @id, @title, @date = photo.id, photo.title
+    if url.nil?
+      @date = photo.datetaken[0..9]
+      @img_url = get_img_url(photo)
+    else
+      @date = photo.dates.taken[0..9]
+      @img_url = url
+    end
+    @flickr_url = FlickRaw.url_photopage(photo)
   end
 end
 
@@ -25,32 +42,33 @@ class FlickrSet
   end
 end
 
+class Configure
+  attr_accessor :conf, :sets
+  
+  def initialize
+    # load up conf file
+    @conf = YAML::load_file(File.dirname(__FILE__) + '/conf.yml')
+    @conf[:user_id] = flickr.people.findByUsername(:username => @conf[:user]).id
+    user = flickr.people.getInfo(:user_id => @conf[:user_id])
+    @conf[:flickr_profile] = user.profileurl
+    @conf[:name] = user.realname
+
+    # read sets file
+    @sets = YAML::load_file(File.dirname(__FILE__) + '/sets.yml')
+  end
+end
+
 # Sinatra !!
 
 configure do
   # use HTML5 when generating HTML
   set :haml, :format => :html5, :attr_wrapper  => '"'
-
-  # load up conf file
-  @@CONF = YAML::load_file(File.dirname(__FILE__) + '/conf.yml')
-  @@CONF[:user_id] = flickr.people.findByUsername(:username => @@CONF[:user]).id
-  user = flickr.people.getInfo(:user_id => @@CONF[:user_id])
-  @@CONF[:flickr_profile] = user.profileurl
-  @@CONF[:name] = user.realname
-
-  # read sets file
-  @@SETS = YAML::load_file(File.dirname(__FILE__) + '/sets.yml')
-  @@SET_IDS = @@SETS.map { |name, set| set[:set_id] }
-
-  # set the last mod time to now, when the app starts up. Updated via /update/now
-  @@last_mod_time = Time.now
+   
+  CONFIG = Configure.new
 end
 
 before do
-  unless request.path_info =~ /update/
-    expires 300, :public, :must_revalidate  # always cache for 5 minutes ...
-    last_modified(@@last_mod_time)          # ... and rely on 304 query after that
-  end
+  @config = CONFIG
 end
 
 helpers do
@@ -61,8 +79,8 @@ helpers do
   def load_images(page, tag=nil)
     @page = page.to_i
     @tag = tag
-    params = { :user_id => @@CONF[:user_id], :extras => 'date_taken, url_l' }
-    params[:machine_tags] = @@CONF[:tag] unless @@CONF[:tag].nil?
+    params = { :user_id => @config.conf[:user_id], :extras => 'date_taken, url_l, path_alias' }
+    params[:machine_tags] = @config.conf[:tag] unless @config.conf[:tag].nil?
     params[:machine_tags] = tag unless tag.nil?
     params[:per_page] = 10 unless page == 0
     params[:page] = page unless page == 0
@@ -75,7 +93,7 @@ helpers do
   def load_set(id)
     @page = 0
     @tag = id
-    params = { :user_id => @@CONF[:user_id], :extras => 'date_taken, url_l', :photoset_id => id }
+    params = { :user_id => @config.conf[:user_id], :extras => 'date_taken, url_l, path_alias', :photoset_id => id }
     set_info = flickr.photosets.getPhotos(params)
     @sequence = build_sequence(set_info.photo)
   end
@@ -83,16 +101,7 @@ helpers do
   # build list of images.
   def build_sequence(photos)
     return [] if photos.nil?
-    photos.map { |photo| Image.new(photo.id, img_url(photo), photo.title, photo.datetaken[0..9]) }
-  end
-  
-  # figure out flickr image url
-  def img_url(photo)
-    unless photo.respond_to?(:url_l)
-      FlickRaw::url(photo)
-    else
-      photo.url_l
-    end
+    photos.map { |photo| Image.new(photo) }
   end
   
   def prev_link
@@ -127,7 +136,7 @@ end
 
 # get list of sets visibile at vqvz.
 get '/sets' do
-  @sets = @@SETS.map do |slug, set|
+  @sets = @config.sets.map do |slug, set|
     FlickrSet.new(set[:set_id], set[:title], set[:thumbnail], slug)
   end
   haml :sets
@@ -141,7 +150,7 @@ end
 
 # load machine tag or local set name
 get '/set/:name' do |name|
-  @@SETS[name].nil? ? load_images(0, "vqvz:set=#{name}") : load_set(@@SETS[name][:set_id])
+  @config.sets[name].nil? ? load_images(0, "vqvz:set=#{name}") : load_set(@config.sets[name][:set_id])
   haml :index
 end
 
@@ -151,23 +160,13 @@ get %r{/photo/(\d+)} do |id|
   sizes = flickr.photos.getSizes(:photo_id => id)
   img_url = sizes.find {|s| s.label == 'Large' }
   img_url ||= sizes.find {|s| s.label == 'Medium' } # always exists
-  @photo = Image.new(id, img_url.source, info.title, info.dates.taken[0..9])
+  @photo = Image.new(info, img_url.source)
   haml :photo
 end
 
 get '/:name' do |@name|
   halt 404 unless File.exists?(File.dirname(__FILE__) + "/views/_#{@name}.haml")
   haml :simple
-end
-
-# caching junk that probably doesn't work
-
-get '/update/now' do
-  @@last_mod_time = Time.now
-end
-
-get '/update/show' do
-  "Last-Update: #{@@last_mod_time}"
 end
 
 # Error Handlers in Production

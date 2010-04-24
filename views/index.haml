@@ -1,19 +1,19 @@
 !!! 5
 %html
   %head
-    %meta(http-equiv="Content-Type" content="text/html; charset=utf-8")
-    %title= @@CONF[:title]
+    = haml(:_meta, :layout => false)
+    %title= @config.conf[:title]
     %link(rel="stylesheet" href="/css/vqvz.css" type="text/css" media="screen" title="default style sheet")
     %link(rel="stylesheet" href="/css/paging_keys.css" type="text/css" media="screen" title="paging keys css")
     %script(type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js")
     %script(type="text/javascript" src="/js/paging_keys.js")
   / 
-    user - #{@@CONF[:user]} | id - #{@@CONF[:user_id]} | tag - #{@tag} | page - #{@page}
+    user - #{@config.conf[:user]} | id - #{@config.conf[:user_id]} | tag - #{@tag} | page - #{@page}
   %body
     = haml(:_gallery_banner, :layout => false)
     #content
       #header
-        %h2= @@CONF[:description]
+        %h2= @config.conf[:description]
       - @sequence.each do |img|
         .photo.hentry{:id => img.id}
           %a{:href => img.flickr_url}
