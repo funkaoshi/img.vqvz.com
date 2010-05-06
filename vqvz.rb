@@ -46,6 +46,8 @@ class Configure
   attr_accessor :conf, :sets
   
   def initialize
+    FlickRaw.api_key = 'ca97585045208ed87aad90107072d168'
+
     # load up conf file
     @conf = YAML::load_file(File.dirname(__FILE__) + '/conf.yml')
     @conf[:user_id] = flickr.people.findByUsername(:username => @conf[:user]).id
