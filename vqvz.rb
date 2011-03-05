@@ -6,7 +6,7 @@ require 'yaml'
 # Some basic information about an image (on Flickr)
 class Image
   attr_accessor :id, :img_url, :flickr_url, :title, :date
-  
+
   # figure out flickr image url
   def get_img_url(photo)
     unless photo.respond_to?(:url_l)
@@ -15,7 +15,11 @@ class Image
       photo.url_l
     end
   end
-  
+
+  def title()
+    @tile.nil? ? "untitled" : @title
+  end
+
   def initialize(photo, url=nil)
     @id, @title, @date = photo.id, photo.title
     if url.nil?
@@ -32,31 +36,35 @@ end
 # basic information about a set
 class FlickrSet
   attr_accessor :id, :title, :thumbnail, :slug
-  
+
   def slug
     @slug ||= @title.downcase.gsub(/[^a-z0-9_]/, '-')
   end
-  
-  def initialize(id, title, thumbnail, slug = nil)
+
+  def initialize(id, title, thumbnail, slug=nil)
     @id, @title, @thumbnail, @slug = id, title, thumbnail, slug
   end
 end
 
 class Configure
   attr_accessor :conf, :sets
-  
+
   def initialize
     FlickRaw.api_key = 'ca97585045208ed87aad90107072d168'
 
     # load up conf file
-    @conf = YAML::load_file(File.dirname(__FILE__) + '/conf.yml')
+    @conf = read_yaml('/conf.yml')
     @conf[:user_id] = flickr.people.findByUsername(:username => @conf[:user]).id
     user = flickr.people.getInfo(:user_id => @conf[:user_id])
     @conf[:flickr_profile] = user.profileurl
     @conf[:name] = user.realname
 
     # read sets file
-    @sets = YAML::load_file(File.dirname(__FILE__) + '/sets.yml')
+    @sets = read_yaml('sets.yml')
+  end
+
+  def read_yaml(filename)
+    YAML::load_file(File.dirname(__FILE__) + '/' + filename)
   end
 end
 
@@ -64,8 +72,8 @@ end
 
 configure do
   # use HTML5 when generating HTML
-  set :haml, :format => :html5, :attr_wrapper  => '"'
-   
+  set :haml, :format => :html5, :attr_wrapper  => "'"
+
   CONFIG = Configure.new
 end
 
@@ -105,20 +113,20 @@ helpers do
     return [] if photos.nil?
     photos.map { |photo| Image.new(photo) }
   end
-  
+
   def prev_link
     case
     when @page <= 1
       "Prev"
     when @page == 2
-      "<a href=\"/\" class=\"prev_page\">Prev</a>"
+      "<a href='/' class='prev_page'>Prev</a>"
     else
-      "<a href=\"/page/#{@page - 1}\" class=\"prev_page\">Prev</a>"
+      "<a href='/page/#{@page - 1}' class='prev_page'>Prev</a>"
     end
   end
-  
+
   def next_link
-    @page >= @pages ? "Next" : "<a href=\"/page/#{@page + 1}\" class=\"next_page\">Next</a>"
+    @page >= @pages ? "Next" : "<a href='/page/#{@page + 1}' class='next_page'>Next</a>"
   end
 end
 
