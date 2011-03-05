@@ -3,15 +3,11 @@
     :set_id: 72157622414990639
     :title: AGO Shapes
     :thumbnail: http://farm3.static.flickr.com/2618/4193675889_bbb58a8cc1_s.jpg
-  australia:
-    :set_id: 72157608179191804
-    :title: Australia 2008
-    :thumbnail: http://farm4.static.flickr.com/3275/2980366654_040d5e3ac0_s.jpg
-  blansdowne: 
+ blansdowne:
     :set_id: 72157619603386788
     :title: Blansdowne
     :thumbnail: http://farm4.static.flickr.com/3623/3617306590_d6386c6e26_s.jpg
-  birds: 
+  birds:
     :set_id: 72157608502514724
     :title: Birds
     :thumbnail: http://farm4.static.flickr.com/3124/2850149542_e7ff883639_s.jpg
@@ -19,11 +15,19 @@
     :set_id: 72157614348062619
     :title: People / Portraits
     :thumbnail: http://farm3.static.flickr.com/2597/4191380555_16e8c1dce3_s.jpg
-  subdivision: 
+  subdivision:
     :set_id: 72157614920778997
     :title: The Subdivision
     :thumbnail: http://farm4.static.flickr.com/3372/3339102255_9593ac4c70_s.jpg
-  uk:
-    :set_id: 72157616692326569
-    :title: UK 2009
-    :thumbnail: http://farm4.static.flickr.com/3606/3443495972_91146cd80b_s.jpg
+  something:
+    :set_id: 72157623732378435
+    :title: Something
+    :thumbnail: http://farm3.static.flickr.com/2743/4522077548_4710624b91_s.jpg
+  yousayparty:
+    :set_id: 72157623655707893
+    :title: You Say Party
+    :thumbnail: http://farm5.static.flickr.com/4016/4227327858_1b5c4da7ce_s.jpg
+  strays:
+    :set_id:72157623424244680
+    :title: Stray Dogs
+    :thumbnail: http://farm5.static.flickr.com/4006/4349664485_b8fd772645_s.jpg
