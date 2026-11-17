@@ -1,24 +1,26 @@
 # img.vqvz.com
 
-A photoblog that uses Flickr as its backend: a paged photostream, curated sets,
-machine-tag sets (`vqvz:set=<name>`), single-photo pages, and j/k keyboard
-paging. Originally Sinatra (2009); now Flask.
+A Claude rewrite of [the original img.vqvz.com Sinatra web application][0], rewritten 
+in Flask. A photoblog that uses Flickr as its backend: a paged photostream, curated 
+sets, machine-tag sets (`vqvz:set=<name>`), single-photo pages, and j/k keyboard
+paging.
 
 ## Run
 
-    uv venv && uv pip install -e '.[dev]'
-    export FLICKR_API_KEY=...          # https://www.flickr.com/services/apps/create/
-    .venv/bin/flask --app vqvz run --debug
-    .venv/bin/pytest                   # Flickr is mocked; no key or network needed
+    # save FLICKR_API_KEY=... in .env file. 
+    # Get key from https://www.flickr.com/services/apps/create
+    uv sync --extra dev
+    uv run flask --app vqvz run --debug
 
-Production: `uv pip install -e '.[prod]' && gunicorn wsgi:app`.
+    # tests
+    uv run pytest
 
 ## Settings (environment variables)
 
 | Variable | Default |
 |---|---|
 | `FLICKR_API_KEY` | (required) |
-| `FLICKR_USERNAME` | `funkaoshi` |
+| `FLICKR_USERNAME` | `USERNAME` |
 | `SITE_TITLE` / `SITE_DESCRIPTION` / `SITE_OWNER` / `SITE_SINCE` | IMG VQVZ / ... |
 | `ANALYTICS_ID` | empty, so no analytics |
 | `PER_PAGE` | `10` |
