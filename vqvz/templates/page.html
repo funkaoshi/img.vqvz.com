@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block title %}{{ site_title }} :: {{ name|upper }}{% endblock %}
+{% block heading %}{{ name|capitalize }}{% endblock %}
+{% block content %}
+  <div class="simple-page" id="{{ name }}">{% include content %}</div>
+{% endblock %}

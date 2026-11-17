@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}{{ site_title }} :: SETS{% endblock %}
+{% block heading %}Sets{% endblock %}
+{% block content %}
+  <ul id="sets">
+    {% for set in sets %}
+    <li><a href="{{ url_for('img.named_set', slug=set.slug) }}"><img src="{{ set.thumbnail }}" alt="" width="75" height="75"><h3>{{ set.title }}</h3></a></li>
+    {% endfor %}
+  </ul>
+{% endblock %}

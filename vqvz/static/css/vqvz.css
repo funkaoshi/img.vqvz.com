@@ -1,0 +1,88 @@
+/* The original img.vqvz.com stylesheet (2009-2016, recovered from the Wayback
+   Machine), with the table/float layout swapped for flexbox and a few
+   max-widths so it also works on a phone. Visually the same at desktop width. */
+
+body {
+    background: #FFF; color: #000;
+    font: 12px/18px Helvetica, Calibri, Arial, sans-serif;
+    margin: 0; padding: 0;
+}
+
+#content {
+    max-width: 1026px;
+    margin: 0 auto;
+    padding: 0 25px;
+}
+
+/* Top Navigation Bar */
+
+#gallery-banner * { margin: 0; padding: 0; }
+
+#gallery-banner {
+    display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 20px;
+    padding: 7px 12px;  /* the old table's cell spacing made the bar this tall */
+    border-bottom: 1px solid black;
+    background-color: #eeeeee;
+}
+
+#gallery-banner,
+#gallery-banner h1,
+#gallery-banner nav {
+    font: 10px Helvetica, Calibri, Arial, sans-serif;
+}
+
+#gallery-banner nav { text-align: right; }
+
+/* Header */
+
+#header { margin: 30px 0; }
+
+/* Style Photo */
+
+.photo {
+    margin-bottom: 100px;
+    scroll-margin-top: 20px;  /* j/k land 20px above each photo, as before */
+}
+
+.photo img {
+    display: block;
+    max-width: 100%; height: auto;
+    border: 1px solid black;
+}
+
+.caption {
+    display: flex; justify-content: space-between; gap: 20px;
+    color: gray;
+}
+
+/* Other Pages */
+
+.simple-page { max-width: 500px; }
+.simple-page img { max-width: 100%; height: auto; }
+
+#sets { list-style: none; margin: 0; padding: 0; }
+#sets li { margin: 0 0 20px; }
+#sets a { display: inline-flex; align-items: center; gap: 22px; }
+#sets img { border: 1px solid black; }
+#sets h3 { margin: 0; }
+
+#news .date { color: gray; }
+#news p { margin-top: 2em; }
+
+.copyright { color: gray; margin-top: 5em; }
+
+/* Footer */
+
+#footer {
+    display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 20px;
+    padding: 5px 10px;
+    border-top: 1px solid black;
+    background-color: #eeeeee;
+    font: 10px Helvetica, Calibri, Arial, sans-serif;
+}
+
+a {
+    text-decoration: none;
+    font-weight: bold;
+    color: #333;
+}

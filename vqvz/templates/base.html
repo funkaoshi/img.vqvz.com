@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ site_title }}{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/vqvz.css') }}">
+  <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <div id="gallery-banner">
+    <h1><a href="https://funkaoshi.com/">A Funkaoshi Production</a> presents <a href="{{ url_for('img.stream') }}">{{ site_title }}</a></h1>
+    <nav>
+      What's Here: <a href="{{ url_for('img.stream') }}">Home</a> | <a href="{{ url_for('img.static_page', name='about') }}">About</a> | <a href="{{ url_for('img.static_page', name='news') }}">News</a> | <a href="{{ url_for('img.sets') }}">Sets</a>
+      {%- block banner_nav %}{% endblock %}
+    </nav>
+  </div>
+
+  <div id="content">
+    <div id="header"><h2>{% block heading %}{% endblock %}</h2></div>
+    {% block content %}{% endblock %}
+    {% block copyright %}<p class="copyright">Everything here is copyright {{ site_owner }} {{ site_since }}&ndash;{{ this_year }}.</p>{% endblock %}
+  </div>
+
+  {% block footer %}{% endblock %}
+
+  {% if analytics_id %}
+  <script async src="https://www.googletagmanager.com/gtag/js?id={{ analytics_id|urlencode }}"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', {{ analytics_id|tojson }});
+  </script>
+  {% endif %}
+</body>
+</html>

@@ -1,0 +1,17 @@
+{% macro prev_link(listing) -%}
+  {% if listing.prev_url %}<a href="{{ listing.prev_url }}" class="prev_page" rel="prev">Prev</a>{% else %}Prev{% endif %}
+{%- endmacro %}
+
+{% macro next_link(listing) -%}
+  {% if listing.next_url %}<a href="{{ listing.next_url }}" class="next_page" rel="next">Next</a>{% else %}Next{% endif %}
+{%- endmacro %}
+
+{# Banner: "Look Around: Prev | Home | Next" #}
+{% macro look_around(listing) -%}
+  {%- if listing.paginated %} &nbsp; &nbsp; Look Around: {{ prev_link(listing) }} | <a href="{{ url_for('img.stream') }}">Home</a> | {{ next_link(listing) }}{% endif -%}
+{%- endmacro %}
+
+{# Footer: "Prev | Page 2 of 783 | Next" #}
+{% macro pager(listing) -%}
+  {%- if listing.paginated %}<span class="pager">{{ prev_link(listing) }} | Page {{ listing.page }} of {{ listing.pages }} | {{ next_link(listing) }}</span>{% endif -%}
+{%- endmacro %}

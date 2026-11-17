@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}{{ site_title }} :: WTF{% endblock %}
+{% block heading %}WTF{% endblock %}
+{% block content %}
+  <div class="simple-page" id="WTF">
+    <p><a href="https://www.flickr.com/photos/funkaoshi/4191380555/" title="Shima by funkaoshi, on Flickr"><img src="https://live.staticflickr.com/2597/4191380555_16e8c1dce3.jpg" width="500" height="320" alt="Shima"></a></p>
+    {% if status == 404 %}
+    <p>Something has gone horribly wrong. The page you are looking for isn't here. Maybe you typed in the URL wrong? It's also quite possible this is all my fault. Let's not play the blame game.</p>
+    {% elif status == 502 %}
+    <p>Flickr isn't answering right now, so there's nothing to show you. Try again in a little while.</p>
+    {% else %}
+    <p>Something has gone horribly wrong, and this time it's definitely my fault.</p>
+    {% endif %}
+    <p class="status">Does this mean anything to you? &mdash; {{ status }}</p>
+  </div>
+{% endblock %}

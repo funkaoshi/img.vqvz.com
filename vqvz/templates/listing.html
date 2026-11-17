@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% from "_macros.html" import look_around, pager %}
+{% block title %}{{ site_title }}{% if listing.page > 1 %} :: Page {{ listing.page }}{% endif %}{% endblock %}
+{% block head %}<script src="{{ url_for('static', filename='js/paging_keys.js') }}" defer></script>{% endblock %}
+{% block banner_nav %}{{ look_around(listing) }}{% endblock %}
+{% block heading %}{{ listing.title }}{% endblock %}
+{% block content %}
+  {% for img in listing.photos %}
+  <div class="photo hentry" id="p{{ img.id }}">
+    <a href="{{ img.page_url }}"><img src="{{ img.img_url }}" alt="{{ img.title }}" loading="{{ 'eager' if loop.index <= 2 else 'lazy' }}"></a>
+    <div class="caption">
+      <p><a href="{{ url_for('img.photo', photo_id=img.id) }}">{{ img.title }}</a></p>
+      <p class="date">{{ img.date_taken }}</p>
+    </div>
+  </div>
+  {% else %}
+  <p>No photos here.</p>
+  {% endfor %}
+{% endblock %}
+{# Listing pages put the copyright in the grey footer bar instead. #}
+{% block copyright %}{% endblock %}
+{% block footer %}
+  <div id="footer">
+    <span>Everything here is copyright {{ site_owner }} {{ site_since }}&ndash;{{ this_year }}.</span>
+    {{ pager(listing) }}
+  </div>
+{% endblock %}
