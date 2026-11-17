@@ -1,0 +1,10 @@
+# Allow-list: the image is public, so only ship what the app needs.
+# In particular .env (the Flickr API key) must never be copied in.
+*
+!pyproject.toml
+!uv.lock
+!README.md
+!wsgi.py
+!sets.yml
+!vqvz/
+**/__pycache__
