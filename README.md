@@ -44,3 +44,5 @@ paging.
   `group_pool` / `favorites` so gv.vqvz.com can be added as another blueprint.
 - `vqvz/cache.py`: a TTL cache in front of the client.
 - `vqvz/site.py`: routes, error handling, cache headers.
+
+[0]: https://funkaoshi.com/blog/img-vqvz
