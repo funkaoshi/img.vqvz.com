@@ -173,3 +173,25 @@ def test_link_preview_escapes_titles(client, fake):
     fake.photo_title = 'Say "cheese" <b>'
     html = client.get("/photo/1").get_data(as_text=True)
     assert meta(html, "og:image:alt") == "Say &#34;cheese&#34; &lt;b&gt;"
+
+
+def test_photos_are_framed_to_fill_viewport(client):
+    html = client.get("/").get_data(as_text=True)
+    assert '<html lang="en" class="photos">' in html
+    assert html.count('class="frame"') == 10
+    assert 'style="--ar: 1.4993"' in html and 'style="--ar: 0.6670"' in html  # 1024x683, 683x1024
+    assert 'width="1024" height="683"' in html
+    assert re.search(r'srcset="[^"]+_k\.jpg 2048w"', html)
+    assert 'sizes="min(calc(100vw - 50px), calc((100vh - 64px) * 1.4993))"' in html
+    assert meta(html, "og:image").endswith("_b.jpg")  # link previews still use Large
+
+
+def test_single_photo_is_framed(client):
+    html = client.get("/photo/4196874052").get_data(as_text=True)
+    assert 'class="photos"' in html and 'class="frame"' in html
+    assert "x_h.jpg 1600w" in html
+
+
+def test_other_pages_keep_the_column(client):
+    assert 'class="photos"' not in client.get("/about").get_data(as_text=True)
+    assert 'class="photos"' not in client.get("/sets").get_data(as_text=True)

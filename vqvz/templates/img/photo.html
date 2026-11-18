@@ -1,10 +1,11 @@
 {% extends "base.html" %}
 {% from "_social.html" import social_meta, listing_meta with context %}
 {% block social %}{{ social_meta(photo.title ~ " :: " ~ site_title, "Photograph by " ~ site_owner ~ (", " ~ photo.date_taken if photo.date_taken else "") ~ ".", photo.img_url, photo.title) }}{% endblock %}
+{% from "_macros.html" import photo_frame %}
+{% block html_class %}photos{% endblock %}
 {% block title %}{{ site_title }} :: {{ photo.title }}{% endblock %}
 {% block heading %}{{ photo.title }}{% endblock %}
 {% block content %}
-  <div class="photo hentry" id="p{{ photo.id }}">
-    <a href="{{ photo.page_url }}"><img src="{{ photo.img_url }}" alt="{{ photo.title }}"></a>
-  </div>
+  {# The title is already the page heading, so the caption is just the date. #}
+  {% call photo_frame(photo, eager=True) %}<p></p><p class="date">{{ photo.date_taken }}</p>{% endcall %}
 {% endblock %}

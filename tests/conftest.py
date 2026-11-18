@@ -17,14 +17,23 @@ SHIMA_SET = "72157619603386788"  # the curated "blansdowne" set in sets.yml
 
 
 def photo_row(i: int, title: str | None = None) -> dict:
-    return {
+    """Even rows are newer 3:2 landscapes with 1600/2048 sizes; odd rows are
+    older 2:3 portraits that stop at Large (1024), like pre-2012 uploads."""
+    base = f"https://live.staticflickr.com/65535/{1000 + i}_abc"
+    row = {
         "id": str(1000 + i), "owner": NSID, "secret": "abc", "server": "65535",
         "title": f"Photo {i}" if title is None else title,
         "datetaken": "2009-12-17 10:00:00", "pathalias": "funkaoshi",
-        "url_l": f"https://live.staticflickr.com/65535/{1000 + i}_abc_b.jpg",
-        "url_z": f"https://live.staticflickr.com/65535/{1000 + i}_abc_z.jpg",
         "ownername": "funkaoshi",
     }
+    if i % 2 == 0:
+        dims = {"z": (640, 427), "l": (1024, 683), "h": (1600, 1067), "k": (2048, 1365)}
+    else:
+        dims = {"z": (427, 640), "l": (683, 1024)}
+    for s, (w, h) in dims.items():
+        row |= {f"url_{s}": f"{base}_{s}.jpg", f"width_{s}": w, f"height_{s}": h}
+    row["url_l"] = f"{base}_b.jpg"  # Flickr's Large URLs end in _b
+    return row
 
 
 def fail(code: int, message: str) -> httpx.Response:
@@ -97,8 +106,9 @@ class FakeFlickr:
                                                 "_content": f"https://www.flickr.com/photos/funkaoshi/{q['photo_id']}/"}]}}}
         elif m == "flickr.photos.getSizes":
             body = {"sizes": {"size": [
-                {"label": "Medium", "source": "https://live.staticflickr.com/1/x.jpg"},
-                {"label": "Large", "source": "https://live.staticflickr.com/1/x_b.jpg"}]}}
+                {"label": "Medium", "source": "https://live.staticflickr.com/1/x.jpg", "width": 500, "height": 333},
+                {"label": "Large", "source": "https://live.staticflickr.com/1/x_b.jpg", "width": "1024", "height": "683"},
+                {"label": "Large 1600", "source": "https://live.staticflickr.com/1/x_h.jpg", "width": 1600, "height": 1067}]}}
         else:
             return fail(112, "Method not found")
         return httpx.Response(200, json={"stat": "ok", **body})

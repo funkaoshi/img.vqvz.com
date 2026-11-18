@@ -125,3 +125,30 @@ def test_config_per_site_and_env_override():
     assert from_env("gv", {"PER_PAGE": "12"})["PER_PAGE"] == 12
     with pytest.raises(ValueError):
         from_env("nope", {})
+
+
+def test_search_row_dimensions_and_srcset():
+    import conftest
+    landscape, portrait = Photo.from_search(conftest.photo_row(0)), Photo.from_search(conftest.photo_row(1))
+    assert landscape.img_url.endswith("_b.jpg")           # still Large, for og:image
+    assert (landscape.width, landscape.height) == (1024, 683)
+    assert round(landscape.aspect, 2) == 1.5 and round(portrait.aspect, 2) == 0.67
+    assert [w for _, w in landscape.sources] == [640, 1024, 1600, 2048]
+    assert landscape.srcset.endswith("_k.jpg 2048w")
+    assert [w for _, w in portrait.sources] == [427, 683]  # older photo: stops at Large
+
+
+def test_search_row_without_dimensions_falls_back():
+    p = Photo.from_search({"id": "1", "secret": "s", "server": "9", "title": "t"})
+    assert (p.width, p.height, p.aspect, p.srcset) == (0, 0, 1.5, "")
+
+
+def test_from_info_dimensions_and_srcset():
+    info = {"id": "7", "title": {"_content": "Shima"}, "owner": {"nsid": "n"}}
+    sizes = [{"label": "Medium 640", "source": "M", "width": "640", "height": "427"},
+             {"label": "Large", "source": "L", "width": 1024, "height": 683},
+             {"label": "Large 2048", "source": "K", "width": 2048, "height": 1365},
+             {"label": "Original", "source": "O", "width": 4000, "height": 2667}]
+    p = Photo.from_info(info, sizes)
+    assert (p.img_url, p.width, p.height) == ("L", 1024, 683)
+    assert p.srcset == "M 640w, L 1024w, K 2048w"      # Original isn't offered

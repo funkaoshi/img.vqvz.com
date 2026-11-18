@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% from "_social.html" import social_meta, listing_meta with context %}
-{% from "_macros.html" import look_around, pager %}
+{% from "_macros.html" import look_around, pager, photo_frame %}
+{% block html_class %}photos{% endblock %}
 {% block title %}{{ site_title }}{% if listing.page > 1 %} :: Page {{ listing.page }}{% endif %}{% endblock %}
 {% block social %}
   {%- if listing.title == config.SITE_DESCRIPTION %}{# the photostream #}
@@ -14,13 +15,10 @@
 {% block heading %}{{ listing.title }}{% endblock %}
 {% block content %}
   {% for img in listing.photos %}
-  <div class="photo hentry" id="p{{ img.id }}">
-    <a href="{{ img.page_url }}"><img src="{{ img.img_url }}" alt="{{ img.title }}" loading="{{ 'eager' if loop.index <= 2 else 'lazy' }}"></a>
-    <div class="caption">
-      <p><a href="{{ url_for('img.photo', photo_id=img.id) }}">{{ img.title }}</a></p>
-      <p class="date">{{ img.date_taken }}</p>
-    </div>
-  </div>
+  {% call photo_frame(img, eager=loop.index <= 2) %}
+    <p><a href="{{ url_for('img.photo', photo_id=img.id) }}">{{ img.title }}</a></p>
+    <p class="date">{{ img.date_taken }}</p>
+  {% endcall %}
   {% else %}
   <p>No photos here.</p>
   {% endfor %}

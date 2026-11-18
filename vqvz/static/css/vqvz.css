@@ -37,23 +37,52 @@ body {
 
 #header { margin: 30px 0; }
 
-/* Style Photo */
+/* Style Photo
+   Each photo + caption fills the viewport: the frame is as wide as the page
+   allows, or as wide as fits the viewport height at the photo's aspect ratio
+   (--ar, set per photo), whichever is smaller. Small images scale up too.
+   Each .photo block is one viewport tall, so j/k and scroll snap land on it. */
 
-.photo {
-    margin-bottom: 100px;
-    scroll-margin-top: 20px;  /* j/k land 20px above each photo, as before */
+:root {
+    /* Viewport height not available to the image: the caption line (26px)
+       plus breathing room above and below (19px each). Keep in sync with the
+       sizes attribute in templates/img/_macros.html. */
+    --chrome: 64px;
 }
 
-.photo img {
+html.photos { scroll-snap-type: y proximity; }
+/* Snap points at the top and bottom too, or scrolling to the very top/bottom
+   snaps back onto the first/last photo and the banner and footer pager
+   become unreachable. */
+html.photos #gallery-banner { scroll-snap-align: start; }
+html.photos #footer { scroll-snap-align: end; }
+html.photos #content { max-width: none; }
+
+.photo {
+    min-height: 100vh;
+    min-height: 100svh;
+    display: flex; align-items: center; justify-content: center;
+    scroll-snap-align: start;
+}
+
+.frame {
+    width: min(100%, calc((100vh - var(--chrome)) * var(--ar, 1.5)));
+    width: min(100%, calc((100svh - var(--chrome)) * var(--ar, 1.5)));
+}
+
+.frame img {
     display: block;
-    max-width: 100%; height: auto;
+    width: 100%; height: auto;
     border: 1px solid black;
+    box-sizing: border-box;
 }
 
 .caption {
     display: flex; justify-content: space-between; gap: 20px;
     color: gray;
 }
+
+.caption p { margin: 8px 0 0; }
 
 /* Other Pages */
 

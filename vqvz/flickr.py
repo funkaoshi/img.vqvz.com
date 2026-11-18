@@ -16,13 +16,20 @@ API_URL = "https://api.flickr.com/services/rest/"
 # Flickr's front end answers httpx's default "python-httpx/x.y" User-Agent
 # with an HTML 502 page, so every request identifies itself explicitly.
 USER_AGENT = "vqvz/2.0 (+https://img.vqvz.com)"
-EXTRAS = "date_taken,url_l,url_c,url_z,path_alias,owner_name"
+EXTRAS = "date_taken,url_z,url_c,url_l,url_h,url_k,path_alias,owner_name"
 
 # Which image size to show, best first. Large suits a single-column photoblog;
 # a group viewer wants 640px images (and other people's photos often have no
 # Large size at all). If none are present we build the 640px URL ourselves.
 LARGE_FIRST = ("url_l", "url_c", "url_z")
 MEDIUM_640 = ("url_z",)
+
+# Every size offered to the browser via srcset, smallest first: 640, 800,
+# 1024, 1600 and 2048px on the long edge. Flickr returns width_x/height_x with
+# each url_x. Photos uploaded before ~2012 stop at 1024 (url_l).
+SRCSET_SIZES = ("url_z", "url_c", "url_l", "url_h", "url_k")
+# The same sizes as photos.getSizes labels them.
+SRCSET_LABELS = ("Medium 640", "Medium 800", "Large", "Large 1600", "Large 2048")
 
 _GROUP_NSID = re.compile(r"^\d+@N\d+$")
 
@@ -60,6 +67,13 @@ def is_group_nsid(ref: str) -> bool:
     return bool(_GROUP_NSID.match(ref))
 
 
+def _int(value: Any) -> int:
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return 0
+
+
 @dataclass(frozen=True)
 class Photo:
     id: str
@@ -69,14 +83,34 @@ class Photo:
     page_url: str
     owner_name: str = ""
     owner_url: str = ""
+    width: int = 0   # of img_url; 0 when Flickr didn't say
+    height: int = 0
+    sources: tuple[tuple[str, int], ...] = ()  # (url, width) for srcset, smallest first
+
+    @property
+    def aspect(self) -> float:
+        """Width / height; 1.5 (3:2) when unknown."""
+        return self.width / self.height if self.width and self.height else 1.5
+
+    @property
+    def srcset(self) -> str:
+        return ", ".join(f"{url} {w}w" for url, w in self.sources)
 
     @classmethod
     def from_search(cls, p: dict[str, Any], owner: str | None = None,
                     sizes: tuple[str, ...] = LARGE_FIRST) -> "Photo":
         """Build from a photos.search / photosets.getPhotos / pool result row."""
-        img = next((p[k] for k in sizes if p.get(k)), None)
-        if not img:  # construct the 640px URL ourselves
+        key = next((k for k in sizes if p.get(k)), None)
+        if key:
+            img, suffix = p[key], key[len("url_"):]
+            width, height = _int(p.get(f"width_{suffix}")), _int(p.get(f"height_{suffix}"))
+        else:  # construct the 640px URL ourselves; size unknown
             img = f"https://live.staticflickr.com/{p['server']}/{p['id']}_{p['secret']}_z.jpg"
+            width = height = 0
+        sources = tuple(
+            (p[k], _int(p.get(f"width_{k[4:]}")))
+            for k in SRCSET_SIZES if p.get(k) and _int(p.get(f"width_{k[4:]}"))
+        )
         who = p.get("pathalias") or p.get("owner") or owner or ""
         return cls(
             id=str(p["id"]),
@@ -86,15 +120,23 @@ class Photo:
             page_url=page_url(who, p["id"]),
             owner_name=p.get("ownername") or "",
             owner_url=photostream_url(who) if who else "",
+            width=width,
+            height=height,
+            sources=sources,
         )
 
     @classmethod
     def from_info(cls, info: dict[str, Any], sizes: list[dict[str, Any]]) -> "Photo":
         """Build from photos.getInfo + photos.getSizes."""
-        by_label = {s["label"]: s["source"] for s in sizes}
-        img = next(
+        by_label = {s["label"]: s for s in sizes}
+        chosen = next(
             (by_label[k] for k in ("Large", "Medium 800", "Medium 640", "Medium") if k in by_label),
-            sizes[-1]["source"] if sizes else "",
+            sizes[-1] if sizes else {},
+        )
+        img = chosen.get("source", "")
+        sources = tuple(
+            (by_label[k]["source"], _int(by_label[k].get("width")))
+            for k in SRCSET_LABELS if k in by_label and _int(by_label[k].get("width"))
         )
         owner = info.get("owner", {})
         url = next(
@@ -110,6 +152,9 @@ class Photo:
             page_url=url,
             owner_name=owner.get("username", ""),
             owner_url=photostream_url(who) if who else "",
+            width=_int(chosen.get("width")),
+            height=_int(chosen.get("height")),
+            sources=sources,
         )
 
 

@@ -15,3 +15,22 @@
 {% macro pager(listing) -%}
   {%- if listing.paginated %}<span class="pager">{{ prev_link(listing) }} | Page {{ listing.page }} of {{ listing.pages }} | {{ next_link(listing) }}</span>{% endif -%}
 {%- endmacro %}
+
+{#
+  A photo sized to fill the viewport: image + caption fit whichever bound comes
+  first, viewport height or page width (see .frame in vqvz.css). --ar is the
+  aspect ratio; sizes tells the browser the display width so srcset picks a
+  sharp image. 50px = #content's side padding, 64px = --chrome in the CSS.
+  The caption comes from the caller:  {% call photo_frame(img) %}...{% endcall %}
+#}
+{% macro photo_frame(img, eager=False) -%}
+  {%- set ar = '%.4f'|format(img.aspect) -%}
+  <div class="photo hentry" id="p{{ img.id }}">
+    <div class="frame" style="--ar: {{ ar }}">
+      <a href="{{ img.page_url }}"><img src="{{ img.img_url }}"
+        {%- if img.srcset %} srcset="{{ img.srcset }}" sizes="min(calc(100vw - 50px), calc((100vh - 64px) * {{ ar }}))"{% endif %}
+        {%- if img.width and img.height %} width="{{ img.width }}" height="{{ img.height }}"{% endif %} alt="{{ img.title }}" loading="{{ 'eager' if eager else 'lazy' }}"></a>
+      <div class="caption">{{ caller() }}</div>
+    </div>
+  </div>
+{%- endmacro %}
