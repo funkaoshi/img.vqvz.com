@@ -46,3 +46,12 @@ paging.
 - `vqvz/site.py`: routes, error handling, cache headers.
 
 [0]: https://funkaoshi.com/blog/img-vqvz
+
+## Behind a reverse proxy
+
+Pages carry link-preview tags (Open Graph and `twitter:card`), so a shared link shows
+the first photo on the page as its thumbnail on Bluesky, X, Mastodon, etc. Those tags
+need the public URL, so the app trusts the proxy's `X-Forwarded-Proto` and
+`X-Forwarded-Host` headers. Caddy sends these by default; with nginx add
+`proxy_set_header X-Forwarded-Proto $scheme;` and `proxy_set_header X-Forwarded-Host $host;`.
+Only publish the app's port on `127.0.0.1`, so nothing can bypass the proxy.

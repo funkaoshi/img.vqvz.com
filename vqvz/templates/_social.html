@@ -1,0 +1,28 @@
+{#
+  Link previews for Bluesky, Mastodon, Slack, etc. (Open Graph) and X (twitter:card,
+  which falls back to the og: tags). URLs must be absolute; behind a reverse proxy
+  request.url is https thanks to ProxyFix in create_app.
+
+  Import with context:  {% from "_social.html" import social_meta with context %}
+#}
+{% macro social_meta(title, description, image=None, image_alt="") -%}
+  <meta name="description" content="{{ description }}">
+  <meta property="og:site_name" content="{{ site_title }}">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="{{ title }}">
+  <meta property="og:description" content="{{ description }}">
+  <meta property="og:url" content="{{ request.url }}">
+  {% if image %}
+  <meta property="og:image" content="{{ image }}">
+  <meta property="og:image:alt" content="{{ image_alt or title }}">
+  <meta name="twitter:card" content="summary_large_image">
+  {% else %}
+  <meta name="twitter:card" content="summary">
+  {% endif %}
+{%- endmacro %}
+
+{# The usual case: a page of photos, previewed by the first one. #}
+{% macro listing_meta(listing, title, description) -%}
+  {% set first = listing.photos[0] if listing.photos else None %}
+  {{ social_meta(title, description, first.img_url if first else None, first.title if first else "") }}
+{%- endmacro %}

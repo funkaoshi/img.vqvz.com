@@ -1,4 +1,6 @@
 {% extends "base.html" %}
+{% from "_social.html" import social_meta, listing_meta with context %}
+{% block social %}{{ social_meta(photo.title ~ " :: " ~ site_title, "Photograph by " ~ site_owner ~ (", " ~ photo.date_taken if photo.date_taken else "") ~ ".", photo.img_url, photo.title) }}{% endblock %}
 {% block title %}{{ site_title }} :: {{ photo.title }}{% endblock %}
 {% block heading %}{{ photo.title }}{% endblock %}
 {% block content %}

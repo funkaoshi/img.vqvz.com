@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import re
+
 import httpx
 import pytest
 import respx
@@ -94,3 +96,8 @@ def app(fake):
 @pytest.fixture
 def client(app):
     return app.test_client()
+
+
+def meta(html, prop):
+    m = re.search(rf'<meta (?:property|name)="{re.escape(prop)}" content="([^"]*)"', html)
+    return m and m.group(1)

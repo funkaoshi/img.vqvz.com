@@ -1,6 +1,14 @@
 {% extends "base.html" %}
+{% from "_social.html" import social_meta, listing_meta with context %}
 {% from "_macros.html" import look_around, pager %}
 {% block title %}{{ site_title }}{% if listing.page > 1 %} :: Page {{ listing.page }}{% endif %}{% endblock %}
+{% block social %}
+  {%- if listing.title == config.SITE_DESCRIPTION %}{# the photostream #}
+  {{ listing_meta(listing, site_title, config.SITE_DESCRIPTION) }}
+  {%- else %}{# a set #}
+  {{ listing_meta(listing, site_title ~ " :: " ~ listing.title, listing.title ~ ": photographs by " ~ site_owner ~ ".") }}
+  {%- endif %}
+{% endblock %}
 {% block head %}<script src="{{ url_for('static', filename='js/paging_keys.js') }}" defer></script>{% endblock %}
 {% block banner_nav %}{{ look_around(listing) }}{% endblock %}
 {% block heading %}{{ listing.title }}{% endblock %}

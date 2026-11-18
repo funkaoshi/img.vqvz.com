@@ -1,4 +1,6 @@
 {% extends "base.html" %}
+{% from "_social.html" import social_meta, listing_meta with context %}
+{% block social %}{{ social_meta(site_title ~ " :: Sets", "Selected sets of photographs by " ~ site_owner ~ ".") }}{% endblock %}
 {% block title %}{{ site_title }} :: SETS{% endblock %}
 {% block heading %}Sets{% endblock %}
 {% block content %}

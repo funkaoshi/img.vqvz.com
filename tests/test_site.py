@@ -1,5 +1,7 @@
 import re
 
+from conftest import meta
+
 
 def nav_hrefs(html, cls):
     return set(re.findall(rf'href="([^"]+)" class="{cls}"', html))
@@ -133,3 +135,40 @@ def test_analytics_only_when_configured(fake):
     assert "googletagmanager" not in html
     html = create_app({"TESTING": True, "ANALYTICS_ID": "G-TEST"}).test_client().get("/about").get_data(as_text=True)
     assert '"G-TEST"' in html
+
+
+def test_link_preview_uses_first_photo(client):
+    html = client.get("/page/2").get_data(as_text=True)
+    first = re.search(r'<img src="([^"]+)"', html.split('id="content"')[1]).group(1)
+    assert meta(html, "og:image") == first
+    assert meta(html, "twitter:card") == "summary_large_image"
+    assert meta(html, "og:title") == "IMG VQVZ"
+    assert meta(html, "og:image:alt") == "Photo 10"
+
+
+def test_link_preview_on_photo_and_set_pages(client):
+    html = client.get("/photo/4196874052").get_data(as_text=True)
+    assert meta(html, "og:image") == "https://live.staticflickr.com/1/x_b.jpg"
+    assert meta(html, "og:title") == "Shima :: IMG VQVZ"
+    html = client.get("/set/blansdowne").get_data(as_text=True)
+    assert meta(html, "og:title") == "IMG VQVZ :: Blansdowne"
+    assert meta(html, "og:image").endswith("_abc_b.jpg")
+
+
+def test_pages_without_photos_get_text_card(client):
+    html = client.get("/about").get_data(as_text=True)
+    assert meta(html, "twitter:card") == "summary" and meta(html, "og:image") is None
+    assert meta(html, "og:title") == "IMG VQVZ :: About"
+
+
+def test_link_preview_url_is_https_behind_proxy(client):
+    # Caddy/nginx talk to the app over http on localhost; ProxyFix restores the public URL.
+    html = client.get("/page/2", headers={"X-Forwarded-Proto": "https",
+                                          "X-Forwarded-Host": "img.vqvz.com"}).get_data(as_text=True)
+    assert meta(html, "og:url") == "https://img.vqvz.com/page/2"
+
+
+def test_link_preview_escapes_titles(client, fake):
+    fake.photo_title = 'Say "cheese" <b>'
+    html = client.get("/photo/1").get_data(as_text=True)
+    assert meta(html, "og:image:alt") == "Say &#34;cheese&#34; &lt;b&gt;"
