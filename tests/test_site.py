@@ -182,7 +182,7 @@ def test_photos_are_framed_to_fill_viewport(client):
     assert 'style="--ar: 1.4993"' in html and 'style="--ar: 0.6670"' in html  # 1024x683, 683x1024
     assert 'width="1024" height="683"' in html
     assert re.search(r'srcset="[^"]+_k\.jpg 2048w"', html)
-    assert 'sizes="min(calc(100vw - 50px), calc((100vh - 64px) * 1.4993))"' in html
+    assert 'sizes="(max-width: 600px) calc(100vw - 24px), min(calc(100vw - 50px), calc((100vh - 64px) * 1.4993))"' in html
     assert meta(html, "og:image").endswith("_b.jpg")  # link previews still use Large
 
 

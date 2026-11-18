@@ -41,13 +41,21 @@ body {
    Each photo + caption fills the viewport: the frame is as wide as the page
    allows, or as wide as fits the viewport height at the photo's aspect ratio
    (--ar, set per photo), whichever is smaller. Small images scale up too.
-   Each .photo block is one viewport tall, so j/k and scroll snap land on it. */
+   Each .photo block is as tall as its photo can be: one viewport when the
+   photo is limited by height (desktop), or just the photo plus caption when
+   it's limited by width (a landscape photo on a phone), so phones don't get
+   screens of empty space between photos. j/k and scroll snap land on blocks. */
 
 :root {
     /* Viewport height not available to the image: the caption line (26px)
        plus breathing room above and below (19px each). Keep in sync with the
        sizes attribute in templates/img/_macros.html. */
     --chrome: 64px;
+    --gutter: 25px;  /* page side margin */
+}
+
+@media (max-width: 600px) {
+    :root { --gutter: 12px; }
 }
 
 html.photos { scroll-snap-type: y proximity; }
@@ -56,11 +64,13 @@ html.photos { scroll-snap-type: y proximity; }
    become unreachable. */
 html.photos #gallery-banner { scroll-snap-align: start; }
 html.photos #footer { scroll-snap-align: end; }
-html.photos #content { max-width: none; }
+html.photos #content { max-width: none; padding: 0 var(--gutter); }
 
 .photo {
     min-height: 100vh;
     min-height: 100svh;
+    /* The photo's height at full page width, plus its caption allowance. */
+    min-height: min(100svh, calc((100vw - 2 * var(--gutter)) / var(--ar, 1.5) + var(--chrome)));
     display: flex; align-items: center; justify-content: center;
     scroll-snap-align: start;
 }
