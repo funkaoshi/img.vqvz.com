@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ site_title }}{% block title %}{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/gv.css') }}">
+  <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+  {% block social %}{% endblock %}
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <div id="content">
+    {% block body %}{% endblock %}
+    <div id="footer">
+      <p>Site designed and built by <a href="https://funkaoshi.com">Ramanan Sivaranjan</a> in 2009. Rebuilt by Claude in 2026.</p>
+    </div>
+  </div>
+
+  {% if analytics_id %}
+  <script async src="https://www.googletagmanager.com/gtag/js?id={{ analytics_id|urlencode }}"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', {{ analytics_id|tojson }});
+  </script>
+  {% endif %}
+</body>
+</html>

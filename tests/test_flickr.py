@@ -106,3 +106,22 @@ def test_requests_send_our_user_agent():
     route = respx.get(API_URL).respond(json={"stat": "ok", "user": {"nsid": "n"}})
     FlickrClient("k", http=httpx.Client()).call("flickr.people.findByUsername", username="x")
     assert route.calls.last.request.headers["User-Agent"] == USER_AGENT
+
+
+def test_image_size_preference():
+    from vqvz.flickr import MEDIUM_640
+    row = {"id": "1", "secret": "s", "server": "9", "title": "t", "url_l": "L", "url_z": "Z",
+           "ownername": "Someone", "pathalias": "someone"}
+    assert Photo.from_search(row).img_url == "L"
+    assert Photo.from_search(row, sizes=MEDIUM_640).img_url == "Z"
+    p = Photo.from_search(row)
+    assert (p.owner_name, p.owner_url) == ("Someone", "https://www.flickr.com/photos/someone/")
+
+
+def test_config_per_site_and_env_override():
+    from vqvz.config import from_env
+    assert from_env("img", {})["PER_PAGE"] == 10
+    assert from_env("gv", {})["PER_PAGE"] == 30
+    assert from_env("gv", {"PER_PAGE": "12"})["PER_PAGE"] == 12
+    with pytest.raises(ValueError):
+        from_env("nope", {})

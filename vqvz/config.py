@@ -29,16 +29,47 @@ def load_sets(path: Path) -> dict[str, CuratedSet]:
     }
 
 
-def from_env(env: os._Environ[str] | dict[str, str] = os.environ) -> dict[str, object]:
-    return {
-        "FLICKR_API_KEY": env.get("FLICKR_API_KEY", ""),
-        "FLICKR_USERNAME": env.get("FLICKR_USERNAME", "funkaoshi"),
-        "SITE_TITLE": env.get("SITE_TITLE", "IMG VQVZ"),
-        "SITE_DESCRIPTION": env.get("SITE_DESCRIPTION", "Photographs by Ramanan Sivaranjan."),
-        "SITE_OWNER": env.get("SITE_OWNER", "Ramanan Sivaranjan"),
-        "SITE_SINCE": int(env.get("SITE_SINCE", "2009")),
-        "ANALYTICS_ID": env.get("ANALYTICS_ID", ""),
-        "PER_PAGE": int(env.get("PER_PAGE", "10")),
-        "CACHE_TTL": int(env.get("CACHE_TTL", "300")),
-        "SETS_FILE": env.get("SETS_FILE", str(ROOT / "sets.yml")),
-    }
+SITES = ("img", "gv")
+
+# Per-site defaults; any of them can be overridden by an environment variable
+# of the same name.
+DEFAULTS: dict[str, dict[str, object]] = {
+    "img": {
+        "SITE_TITLE": "IMG VQVZ",
+        "SITE_DESCRIPTION": "Photographs by Ramanan Sivaranjan.",
+        "SITE_SINCE": 2009,
+        "PER_PAGE": 10,
+    },
+    "gv": {
+        "SITE_TITLE": "GROUP VIEWQVZ",
+        "SITE_DESCRIPTION": "Flickr Group Viewer",
+        "SITE_SINCE": 2010,
+        "PER_PAGE": 30,
+        # Pre-filled in the "view a group" form.
+        "DEFAULT_GROUP_URL": "https://www.flickr.com/groups/onthestreet/",
+    },
+}
+
+COMMON: dict[str, object] = {
+    "FLICKR_API_KEY": "",
+    "FLICKR_USERNAME": "funkaoshi",
+    "SITE_OWNER": "Ramanan Sivaranjan",
+    "ANALYTICS_ID": "",
+    "CACHE_TTL": 300,
+    "SETS_FILE": str(ROOT / "sets.yml"),
+}
+
+
+def from_env(site: str, env: os._Environ[str] | dict[str, str] = os.environ) -> dict[str, object]:
+    """Settings for `site`: its defaults, overridden by matching env vars.
+
+    Values are coerced to the default's type, so PER_PAGE=20 becomes an int.
+    """
+    if site not in SITES:
+        raise ValueError(f"unknown site {site!r}; expected one of {SITES}")
+    settings = {**COMMON, **DEFAULTS[site]}
+    for key, default in settings.items():
+        if key in env:
+            settings[key] = type(default)(env[key])
+    settings["SITE"] = site
+    return settings

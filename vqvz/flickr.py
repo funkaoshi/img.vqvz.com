@@ -1,7 +1,7 @@
 """Site-agnostic Flickr access: a thin REST client plus the Photo/Listing models.
 
-Nothing in here knows about img.vqvz.com specifically, so a gv.vqvz.com style
-group viewer can reuse it as-is.
+Shared by img.vqvz.com (one person's photostream) and gv.vqvz.com (group
+pools and favourites); nothing in here knows about either site.
 """
 
 from __future__ import annotations
@@ -17,6 +17,14 @@ API_URL = "https://api.flickr.com/services/rest/"
 # with an HTML 502 page, so every request identifies itself explicitly.
 USER_AGENT = "vqvz/2.0 (+https://img.vqvz.com)"
 EXTRAS = "date_taken,url_l,url_c,url_z,path_alias,owner_name"
+
+# Which image size to show, best first. Large suits a single-column photoblog;
+# a group viewer wants 640px images (and other people's photos often have no
+# Large size at all). If none are present we build the 640px URL ourselves.
+LARGE_FIRST = ("url_l", "url_c", "url_z")
+MEDIUM_640 = ("url_z",)
+
+_GROUP_NSID = re.compile(r"^\d+@N\d+$")
 
 # Flickr error codes that mean "the thing you asked for isn't there".
 NOT_FOUND_CODES = {1, 2}
@@ -44,6 +52,14 @@ def page_url(owner: str, photo_id: str) -> str:
     return f"https://www.flickr.com/photos/{owner}/{photo_id}/"
 
 
+def photostream_url(owner: str) -> str:
+    return f"https://www.flickr.com/photos/{owner}/"
+
+
+def is_group_nsid(ref: str) -> bool:
+    return bool(_GROUP_NSID.match(ref))
+
+
 @dataclass(frozen=True)
 class Photo:
     id: str
@@ -51,11 +67,14 @@ class Photo:
     date_taken: str  # YYYY-MM-DD
     img_url: str
     page_url: str
+    owner_name: str = ""
+    owner_url: str = ""
 
     @classmethod
-    def from_search(cls, p: dict[str, Any], owner: str | None = None) -> "Photo":
-        """Build from a photos.search / photosets.getPhotos result row."""
-        img = p.get("url_l") or p.get("url_c") or p.get("url_z")
+    def from_search(cls, p: dict[str, Any], owner: str | None = None,
+                    sizes: tuple[str, ...] = LARGE_FIRST) -> "Photo":
+        """Build from a photos.search / photosets.getPhotos / pool result row."""
+        img = next((p[k] for k in sizes if p.get(k)), None)
         if not img:  # construct the 640px URL ourselves
             img = f"https://live.staticflickr.com/{p['server']}/{p['id']}_{p['secret']}_z.jpg"
         who = p.get("pathalias") or p.get("owner") or owner or ""
@@ -65,6 +84,8 @@ class Photo:
             date_taken=(p.get("datetaken") or "")[:10],
             img_url=img,
             page_url=page_url(who, p["id"]),
+            owner_name=p.get("ownername") or "",
+            owner_url=photostream_url(who) if who else "",
         )
 
     @classmethod
@@ -80,12 +101,15 @@ class Photo:
             (u["_content"] for u in info.get("urls", {}).get("url", []) if u.get("type") == "photopage"),
             page_url(owner.get("path_alias") or owner.get("nsid", ""), info["id"]),
         )
+        who = owner.get("path_alias") or owner.get("nsid", "")
         return cls(
             id=str(info["id"]),
             title=clean_title(info.get("title", {}).get("_content")),
             date_taken=(info.get("dates", {}).get("taken") or "")[:10],
             img_url=img,
             page_url=url,
+            owner_name=owner.get("username", ""),
+            owner_url=photostream_url(who) if who else "",
         )
 
 
@@ -133,12 +157,23 @@ class User:
     profile_url: str
 
 
-class FlickrClient:
-    """Read-only Flickr REST client. Only public, unauthenticated calls."""
+@dataclass(frozen=True)
+class Group:
+    nsid: str
+    name: str
 
-    def __init__(self, api_key: str, http: httpx.Client | None = None):
+
+class FlickrClient:
+    """Read-only Flickr REST client. Only public, unauthenticated calls.
+
+    `sizes` is the image size preference used for every photo list.
+    """
+
+    def __init__(self, api_key: str, http: httpx.Client | None = None,
+                 sizes: tuple[str, ...] = LARGE_FIRST):
         self.api_key = api_key
         self.http = http or httpx.Client(timeout=10.0)
+        self.sizes = sizes
 
     def call(self, method: str, **params: Any) -> dict[str, Any]:
         query = {
@@ -176,12 +211,21 @@ class FlickrClient:
             profile_url=p.get("profileurl", {}).get("_content", ""),
         )
 
+    # -- groups ------------------------------------------------------------
+
+    def group(self, ref: str) -> Group:
+        """Resolve a group NSID ("755579@N24") or URL name ("photographsonthebrain")."""
+        if is_group_nsid(ref):
+            g = self.call("flickr.groups.getInfo", group_id=ref)["group"]
+            return Group(nsid=g["id"], name=g.get("name", {}).get("_content", ref))
+        g = self.call("flickr.urls.lookupGroup", url=f"https://www.flickr.com/groups/{ref}/")["group"]
+        return Group(nsid=g["id"], name=g.get("groupname", {}).get("_content", ref))
+
     # -- photo lists -------------------------------------------------------
 
-    @staticmethod
-    def _page(block: dict[str, Any], owner: str | None = None, title: str = "") -> PhotoPage:
+    def _page(self, block: dict[str, Any], owner: str | None = None, title: str = "") -> PhotoPage:
         return PhotoPage(
-            photos=[Photo.from_search(p, owner) for p in block.get("photo", [])],
+            photos=[Photo.from_search(p, owner, self.sizes) for p in block.get("photo", [])],
             page=int(block.get("page", 1)),
             pages=max(1, int(block.get("pages", 1))),
             title=title,

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% from "_social.html" import social_meta, listing_meta with context %}
+{% block social %}{{ social_meta("Flickr Group Viewer", "Quickly browse the photographs in a Flickr group pool, using the j/k keys.") }}{% endblock %}
+{% from "_macros.html" import group_form with context %}
+{% block body %}
+  <header><h1>Flickr Group Viewer</h1></header>
+  <div id="index">
+    <p>Use Flickr Group Viewer to quickly browse through the photographs in a
+    flickr group. Drop the group URL into the form below. You can browse
+    between photographs (and pages) using the j/k keys on your keyboard.</p>
+    {% if error %}<p class="error">&ldquo;{{ error }}&rdquo; doesn't look like a Flickr group URL. Try something like {{ default_group_url }}.</p>{% endif %}
+    {{ group_form("Flickr Group URL:") }}
+    <p>Here are some group pools I think are pretty damn good:
+    {% for name, nsid in featured -%}
+      <a href="{{ url_for('gv.group', ref=nsid) }}">{{ name }}</a>{{ "." if loop.last else "," }}
+    {% endfor %}</p>
+  </div>
+{% endblock %}

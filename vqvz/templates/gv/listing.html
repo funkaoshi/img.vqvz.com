@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% from "_social.html" import social_meta, listing_meta with context %}
+{% from "_macros.html" import group_form, nav_links with context %}
+{% block title %} :: {{ listing.title }}{% endblock %}
+{% block social %}{{ listing_meta(listing, "Viewing " ~ listing.title, "Photographs from " ~ listing.title ~ " on Flickr, via the Flickr Group Viewer.") }}{% endblock %}
+{% block head %}<script src="{{ url_for('static', filename='js/paging_keys.js') }}" defer></script>{% endblock %}
+{% block body %}
+  <div id="header">
+    <h1>Viewing {{ listing.title }}</h1>
+    {{ group_form("View another group?") }}
+    <div id="nav"><p>{{ nav_links(listing) }} &nbsp; &nbsp; &nbsp; j/k keys will move between photos (and pages)</p></div>
+  </div>
+  <div id="images">
+    {% for img in listing.photos %}
+    <div class="photo hentry" id="p{{ img.id }}">
+      <a href="{{ img.page_url }}"><img src="{{ img.img_url }}" alt="{{ img.title }}" loading="{{ 'eager' if loop.index <= 2 else 'lazy' }}"></a>
+      <p>{{ img.title }}{% if img.owner_name %} by <a href="{{ img.owner_url }}">{{ img.owner_name }}</a>{% endif %}</p>
+    </div>
+    {% else %}
+    <p>No photos here.</p>
+    {% endfor %}
+    <div class="nav"><p>{{ nav_links(listing) }}</p></div>
+  </div>
+{% endblock %}

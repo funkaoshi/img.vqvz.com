@@ -46,9 +46,11 @@ COPY --from=build /app /app
 USER 65532:65532
 ENV PATH="/app/.venv/bin:$PATH" \
     HOME=/tmp \
-    PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1 \
+    VQVZ_SITE=img
 
 EXPOSE 8003
 
 # Settings (FLICKR_API_KEY at minimum) come from the environment at run time.
+# The same image serves gv.vqvz.com with -e VQVZ_SITE=gv.
 CMD ["gunicorn", "-b", "0.0.0.0:8003", "-w", "1", "--threads", "4", "wsgi:app"]

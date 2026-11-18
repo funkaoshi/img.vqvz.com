@@ -137,6 +137,7 @@ def test_analytics_only_when_configured(fake):
     assert '"G-TEST"' in html
 
 
+
 def test_link_preview_uses_first_photo(client):
     html = client.get("/page/2").get_data(as_text=True)
     first = re.search(r'<img src="([^"]+)"', html.split('id="content"')[1]).group(1)

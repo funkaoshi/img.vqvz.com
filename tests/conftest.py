@@ -22,7 +22,13 @@ def photo_row(i: int, title: str | None = None) -> dict:
         "title": f"Photo {i}" if title is None else title,
         "datetaken": "2009-12-17 10:00:00", "pathalias": "funkaoshi",
         "url_l": f"https://live.staticflickr.com/65535/{1000 + i}_abc_b.jpg",
+        "url_z": f"https://live.staticflickr.com/65535/{1000 + i}_abc_z.jpg",
+        "ownername": "funkaoshi",
     }
+
+
+def fail(code: int, message: str) -> httpx.Response:
+    return httpx.Response(200, json={"stat": "fail", "code": code, "message": message})
 
 
 class FakeFlickr:
@@ -34,6 +40,9 @@ class FakeFlickr:
         self.fail_with: tuple[int, str] | None = None
         self.photo_title = "Shima"
         self.tagged: dict[str, int] = {"vqvz:set=shima": 2}
+        # Groups by NSID, and URL name -> NSID for flickr.urls.lookupGroup.
+        self.groups = {"755579@N24": "Photographs on the Brain"}
+        self.group_aliases = {"photographsonthebrain": "755579@N24"}
 
     def page_block(self, page: int, per_page: int, pages: int, **extra) -> dict:
         start = (page - 1) * per_page
@@ -64,6 +73,22 @@ class FakeFlickr:
         elif m == "flickr.photosets.getPhotos":
             body = {"photoset": self.page_block(page, per_page, 2, owner=NSID,
                                                 title=f"Set {q['photoset_id']}")}
+        elif m == "flickr.groups.getInfo":
+            if q["group_id"] not in self.groups:
+                return fail(1, "Group not found")
+            body = {"group": {"id": q["group_id"], "name": {"_content": self.groups[q["group_id"]]}}}
+        elif m == "flickr.urls.lookupGroup":
+            alias = q["url"].rstrip("/").rsplit("/", 1)[-1]
+            if alias not in self.group_aliases:
+                return fail(1, "Group not found")
+            nsid = self.group_aliases[alias]
+            body = {"group": {"id": nsid, "groupname": {"_content": self.groups[nsid]}}}
+        elif m == "flickr.groups.pools.getPhotos":
+            if q["group_id"] not in self.groups:
+                return fail(1, "Group not found")
+            body = {"photos": self.page_block(page, per_page, 2)}
+        elif m == "flickr.favorites.getPublicList":
+            body = {"photos": self.page_block(page, per_page, 1)}
         elif m == "flickr.photos.getInfo":
             body = {"photo": {"id": q["photo_id"], "title": {"_content": self.photo_title},
                               "dates": {"taken": "2009-12-18 12:00:00"},
@@ -75,7 +100,7 @@ class FakeFlickr:
                 {"label": "Medium", "source": "https://live.staticflickr.com/1/x.jpg"},
                 {"label": "Large", "source": "https://live.staticflickr.com/1/x_b.jpg"}]}}
         else:
-            return httpx.Response(200, json={"stat": "fail", "code": 112, "message": "Method not found"})
+            return fail(112, "Method not found")
         return httpx.Response(200, json={"stat": "ok", **body})
 
 
@@ -87,15 +112,27 @@ def fake():
         yield fake
 
 
+def make_app(site: str):
+    from vqvz import gv, img
+    sizes = {"img": img.IMAGE_SIZES, "gv": gv.IMAGE_SIZES}[site]
+    flickr = CachedFlickr(FlickrClient("test-key", http=httpx.Client(), sizes=sizes))
+    return create_app({"TESTING": True, "FLICKR_API_KEY": "test-key", "ANALYTICS_ID": ""},
+                      flickr=flickr, site=site)
+
+
 @pytest.fixture
 def app(fake):
-    flickr = CachedFlickr(FlickrClient("test-key", http=httpx.Client()))
-    return create_app({"TESTING": True, "FLICKR_API_KEY": "test-key", "ANALYTICS_ID": ""}, flickr=flickr)
+    return make_app("img")
 
 
 @pytest.fixture
 def client(app):
     return app.test_client()
+
+
+@pytest.fixture
+def gv_client(fake):
+    return make_app("gv").test_client()
 
 
 def meta(html, prop):

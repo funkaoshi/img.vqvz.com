@@ -1,27 +1,29 @@
-"""Routes for img.vqvz.com."""
+"""img.vqvz.com: one person's Flickr photostream as a photoblog."""
 
 from __future__ import annotations
 
 import re
-from datetime import date
 from pathlib import Path
-from typing import Callable
 
-from flask import (Blueprint, abort, current_app, redirect, render_template, request, url_for)
-from werkzeug.exceptions import HTTPException
+from flask import Blueprint, Flask, abort, current_app, redirect, render_template, request, url_for
 
-from .flickr import FlickrError, Listing, PhotoPage
+from .config import load_sets
+from .flickr import LARGE_FIRST
+from .web import flickr, make_listing, page_arg, per_page
+
+IMAGE_SIZES = LARGE_FIRST
 
 bp = Blueprint("img", __name__)
 
-PAGES_DIR = Path(__file__).parent / "templates" / "pages"
+PAGES_DIR = Path(__file__).parent / "templates" / "img" / "pages"
 # Static pages are an allow-list fixed at import time: no filesystem probing per request.
 STATIC_PAGES = frozenset(p.stem for p in PAGES_DIR.glob("*.html"))
 SLUG = re.compile(r"^[a-z0-9_-]+$")
 
 
-def flickr():
-    return current_app.extensions["flickr"]
+def init_app(app: Flask) -> None:
+    app.extensions["sets"] = load_sets(Path(app.config["SETS_FILE"]))
+    app.register_blueprint(bp)
 
 
 def curated_sets():
@@ -30,24 +32,6 @@ def curated_sets():
 
 def user_nsid() -> str:
     return flickr().user(current_app.config["FLICKR_USERNAME"]).nsid
-
-
-def page_arg() -> int:
-    page = request.args.get("page", 1, type=int)
-    if page < 1:
-        abort(404)
-    return page
-
-
-def make_listing(title: str, result: PhotoPage, url_for_page: Callable[[int], str]) -> Listing:
-    if result.page > result.pages:  # Flickr happily returns nothing past the end
-        abort(404)
-    return Listing(title=title, photos=result.photos, page=result.page,
-                   pages=result.pages, url_for_page=url_for_page)
-
-
-def per_page() -> int:
-    return current_app.config["PER_PAGE"]
 
 
 # -- photostream -------------------------------------------------------------
@@ -115,52 +99,3 @@ def static_page(name: str):
     if name not in STATIC_PAGES:
         abort(404)
     return render_template("page.html", name=name, content=f"pages/{name}.html")
-
-
-# -- plumbing --------------------------------------------------------------------
-
-@bp.app_context_processor
-def site_globals():
-    cfg = current_app.config
-    return {
-        "site_title": cfg["SITE_TITLE"],
-        "site_owner": cfg["SITE_OWNER"],
-        "site_since": cfg["SITE_SINCE"],
-        "analytics_id": cfg["ANALYTICS_ID"],
-        "this_year": date.today().year,
-    }
-
-
-@bp.app_errorhandler(FlickrError)
-def flickr_error(e: FlickrError):
-    current_app.logger.warning("%s", e)
-    if e.not_found:
-        return render_error(404)
-    return render_error(502)
-
-
-@bp.app_errorhandler(HTTPException)
-def http_error(e: HTTPException):
-    if e.code and e.code >= 400:
-        return render_error(e.code)
-    return e
-
-
-@bp.app_errorhandler(Exception)
-def server_error(e: Exception):
-    current_app.logger.exception("unhandled error")
-    return render_error(500)
-
-
-def render_error(status: int):
-    return render_template("error.html", status=status), status
-
-
-@bp.after_app_request
-def cache_headers(resp):
-    # The old Rack::Cache setup never cached anything because nothing sent
-    # Cache-Control. Let browsers and any proxy/CDN hold pages for 5 minutes.
-    if request.method == "GET" and resp.status_code == 200:
-        resp.cache_control.public = True
-        resp.cache_control.max_age = current_app.config["CACHE_TTL"]
-    return resp

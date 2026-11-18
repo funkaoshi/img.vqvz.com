@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% from "_macros.html" import group_form with context %}
+{% block title %} :: WTF?!{% endblock %}
+{% block body %}
+  <header><h1>WTF?!</h1></header>
+  <div id="index">
+    {% if status == 404 %}
+    <p>Yeah, so something went wrong. Who knows what? Let's not play the blame game.
+    (That group, person or page doesn't seem to exist, or isn't public.)</p>
+    {% elif status == 502 %}
+    <p>Flickr isn't answering right now, so there's nothing to show you. Try again in a little while.</p>
+    {% else %}
+    <p>Yeah, so something went wrong. Who knows what? Let's not play the blame game.</p>
+    {% endif %}
+    {{ group_form("View another group?") }}
+  </div>
+{% endblock %}

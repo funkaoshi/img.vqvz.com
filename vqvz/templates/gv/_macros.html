@@ -1,0 +1,16 @@
+{% macro group_form(label) -%}
+  <form action="{{ url_for('gv.find_group') }}" method="get">
+    <p>
+      <label for="searchbox">{{ label }}</label>
+      <input id="searchbox" type="text" name="url" value="{{ default_group_url }}" required>
+      <input id="ok" type="submit" value="OK">
+    </p>
+  </form>
+{%- endmacro %}
+
+{# "Prev | 1 of 375 | Next", as on the original site. #}
+{% macro nav_links(listing) -%}
+  {% if listing.prev_url %}<a class="prev_page" rel="prev" href="{{ listing.prev_url }}">Prev</a>{% else %}Prev{% endif %}
+  | {{ listing.page }} of {{ listing.pages }} |
+  {% if listing.next_url %}<a class="next_page" rel="next" href="{{ listing.next_url }}">Next</a>{% else %}Next{% endif %}
+{%- endmacro %}
