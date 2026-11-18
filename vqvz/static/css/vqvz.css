@@ -19,6 +19,7 @@ body {
 #gallery-banner * { margin: 0; padding: 0; }
 
 #gallery-banner {
+    position: sticky; top: 0; z-index: 10;  /* stays at the top of the screen */
     display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 20px;
     padding: 7px 12px;  /* the old table's cell spacing made the bar this tall */
     border-bottom: 1px solid black;
@@ -41,6 +42,8 @@ body {
    Each photo + caption fills the viewport: the frame is as wide as the page
    allows, or as wide as fits the viewport height at the photo's aspect ratio
    (--ar, set per photo), whichever is smaller. Small images scale up too.
+   The banner stays fixed at the top, so "the viewport" here means the space
+   below it (100svh - --banner).
    Each .photo block is as tall as its photo can be: one viewport when the
    photo is limited by height (desktop), or just the photo plus caption when
    it's limited by width (a landscape photo on a phone), so phones don't get
@@ -52,32 +55,36 @@ body {
        sizes attribute in templates/img/_macros.html. */
     --chrome: 64px;
     --gutter: 25px;  /* page side margin */
+    /* Height of the fixed banner; banner.js sets the exact value. These
+       fallbacks are its usual height on desktop and on phones (two lines). */
+    --banner: 26px;
 }
 
 @media (max-width: 600px) {
-    :root { --gutter: 12px; }
+    :root { --gutter: 12px; --banner: 39px; }
 }
 
-html.photos { scroll-snap-type: y proximity; }
-/* Snap points at the top and bottom too, or scrolling to the very top/bottom
-   snaps back onto the first/last photo and the banner and footer pager
-   become unreachable. */
-html.photos #gallery-banner { scroll-snap-align: start; }
+/* scroll-padding-top makes snapping (and j/k) stop each photo just below the
+   fixed banner rather than underneath it. */
+html.photos { scroll-snap-type: y proximity; scroll-padding-top: var(--banner); }
+/* A snap point at the bottom too, or scrolling to the very bottom snaps back
+   onto the last photo and the footer pager becomes unreachable. */
 html.photos #footer { scroll-snap-align: end; }
 html.photos #content { max-width: none; padding: 0 var(--gutter); }
 
 .photo {
-    min-height: 100vh;
-    min-height: 100svh;
-    /* The photo's height at full page width, plus its caption allowance. */
-    min-height: min(100svh, calc((100vw - 2 * var(--gutter)) / var(--ar, 1.5) + var(--chrome)));
+    min-height: calc(100vh - var(--banner));
+    min-height: calc(100svh - var(--banner));
+    /* ...or the photo's height at full page width plus its caption, if less. */
+    min-height: min(calc(100svh - var(--banner)),
+                    calc((100vw - 2 * var(--gutter)) / var(--ar, 1.5) + var(--chrome)));
     display: flex; align-items: center; justify-content: center;
     scroll-snap-align: start;
 }
 
 .frame {
-    width: min(100%, calc((100vh - var(--chrome)) * var(--ar, 1.5)));
-    width: min(100%, calc((100svh - var(--chrome)) * var(--ar, 1.5)));
+    width: min(100%, calc((100vh - var(--banner) - var(--chrome)) * var(--ar, 1.5)));
+    width: min(100%, calc((100svh - var(--banner) - var(--chrome)) * var(--ar, 1.5)));
 }
 
 .frame img {

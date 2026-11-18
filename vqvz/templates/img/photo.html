@@ -4,8 +4,7 @@
 {% from "_macros.html" import photo_frame %}
 {% block html_class %}photos{% endblock %}
 {% block title %}{{ site_title }} :: {{ photo.title }}{% endblock %}
-{% block heading %}{{ photo.title }}{% endblock %}
+{% block header %}{% endblock %}
 {% block content %}
-  {# The title is already the page heading, so the caption is just the date. #}
-  {% call photo_frame(photo, eager=True) %}<p></p><p class="date">{{ photo.date_taken }}</p>{% endcall %}
+  {% call photo_frame(photo, eager=True) %}<p><a href="{{ photo.page_url }}">{{ photo.title }}</a></p><p class="date">{{ photo.date_taken }}</p>{% endcall %}
 {% endblock %}

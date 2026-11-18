@@ -11,15 +11,16 @@
 </head>
 <body>
   <div id="gallery-banner">
-    <h1><a href="https://funkaoshi.com/">A Funkaoshi Production</a> presents <a href="{{ url_for('img.stream') }}">{{ site_title }}</a></h1>
+    <h1><a href="https://funkaoshi.com/">A Funkaoshi Production</a> presents <a href="{{ url_for('img.stream') }}">{{ site_title }}</a>{% block banner_title %}{% endblock %}</h1>
     <nav>
       What's Here: <a href="{{ url_for('img.stream') }}">Home</a> | <a href="{{ url_for('img.static_page', name='about') }}">About</a> | <a href="{{ url_for('img.static_page', name='news') }}">News</a> | <a href="{{ url_for('img.sets') }}">Sets</a>
       {%- block banner_nav %}{% endblock %}
     </nav>
   </div>
+  <script src="{{ url_for('static', filename='js/banner.js') }}"></script>
 
   <div id="content">
-    <div id="header"><h2>{% block heading %}{% endblock %}</h2></div>
+    {% block header %}<div id="header"><h2>{% block heading %}{% endblock %}</h2></div>{% endblock %}
     {% block content %}{% endblock %}
     {% block copyright %}<p class="copyright">Everything here is copyright {{ site_owner }} {{ site_since }}&ndash;{{ this_year }}.</p>{% endblock %}
   </div>

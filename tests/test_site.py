@@ -61,7 +61,7 @@ def test_set_by_id_is_paginated(client, fake):
 
 def test_curated_set_uses_photoset_id_from_sets_yml(client, fake):
     html = client.get("/set/blansdowne").get_data(as_text=True)
-    assert "<h2>Blansdowne</h2>" in html
+    assert "IMG VQVZ</a> :: Blansdowne</h1>" in html  # set name is in the banner
     assert any(c.get("photoset_id") == "72157619603386788" for c in fake.calls)
 
 
@@ -78,7 +78,8 @@ def test_unknown_slug_with_no_tagged_photos_is_404(client):
 
 def test_single_photo(client):
     html = client.get("/photo/4196874052").get_data(as_text=True)
-    assert "<h2>Shima</h2>" in html
+    assert "<h2>" not in html  # title is in the caption, linking to Flickr
+    assert '<p><a href="https://www.flickr.com/photos/funkaoshi/4196874052/">Shima</a></p>' in html
     assert 'src="https://live.staticflickr.com/1/x_b.jpg"' in html
 
 
@@ -182,7 +183,7 @@ def test_photos_are_framed_to_fill_viewport(client):
     assert 'style="--ar: 1.4993"' in html and 'style="--ar: 0.6670"' in html  # 1024x683, 683x1024
     assert 'width="1024" height="683"' in html
     assert re.search(r'srcset="[^"]+_k\.jpg 2048w"', html)
-    assert 'sizes="(max-width: 600px) calc(100vw - 24px), min(calc(100vw - 50px), calc((100vh - 64px) * 1.4993))"' in html
+    assert 'sizes="(max-width: 600px) calc(100vw - 24px), min(calc(100vw - 50px), calc((100vh - 90px) * 1.4993))"' in html
     assert meta(html, "og:image").endswith("_b.jpg")  # link previews still use Large
 
 
@@ -195,3 +196,13 @@ def test_single_photo_is_framed(client):
 def test_other_pages_keep_the_column(client):
     assert 'class="photos"' not in client.get("/about").get_data(as_text=True)
     assert 'class="photos"' not in client.get("/sets").get_data(as_text=True)
+
+
+def test_photo_pages_have_no_heading_and_measure_the_banner(client):
+    html = client.get("/").get_data(as_text=True)
+    assert '<div id="header">' not in html
+    assert "Photographs by Ramanan Sivaranjan." not in html.split("</head>")[1]  # only in <meta>
+    assert "IMG VQVZ</a></h1>" in html  # no " :: title" on the stream
+    assert "js/banner.js" in html
+    about = client.get("/about").get_data(as_text=True)
+    assert "<h2>About</h2>" in about and "js/banner.js" in about

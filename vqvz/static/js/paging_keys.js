@@ -4,7 +4,10 @@
   "use strict";
 
   function photos() { return Array.from(document.querySelectorAll(".photo")); }
-  function top(el) { return el.getBoundingClientRect().top + window.scrollY; }
+  // Where the page scrolls to so that el sits just below the fixed banner
+  // (the CSS sets scroll-padding-top to the banner's height).
+  function pad() { return parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0; }
+  function top(el) { return el.getBoundingClientRect().top + window.scrollY - pad(); }
   function go(el) { window.scrollTo({ top: top(el), behavior: "instant" }); }
 
   function follow(selector, hash) {

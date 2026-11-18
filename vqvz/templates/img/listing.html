@@ -12,7 +12,11 @@
 {% endblock %}
 {% block head %}<script src="{{ url_for('static', filename='js/paging_keys.js') }}" defer></script>{% endblock %}
 {% block banner_nav %}{{ look_around(listing) }}{% endblock %}
-{% block heading %}{{ listing.title }}{% endblock %}
+{# Photo pages have no heading, so the first photo starts right under the
+   banner. A set's name goes in the banner instead; the stream's description
+   is only in the page's <meta> tags. #}
+{% block header %}{% endblock %}
+{% block banner_title %}{% if listing.title != config.SITE_DESCRIPTION %} :: {{ listing.title }}{% endif %}{% endblock %}
 {% block content %}
   {% for img in listing.photos %}
   {% call photo_frame(img, eager=loop.index <= 2) %}
