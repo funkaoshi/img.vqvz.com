@@ -136,11 +136,12 @@ def test_search_row_dimensions_and_srcset():
     assert [w for _, w in landscape.sources] == [640, 1024, 1600, 2048]
     assert landscape.srcset.endswith("_k.jpg 2048w")
     assert [w for _, w in portrait.sources] == [427, 683]  # older photo: stops at Large
+    assert (landscape.max_width, portrait.max_width) == (2048, 683)
 
 
 def test_search_row_without_dimensions_falls_back():
     p = Photo.from_search({"id": "1", "secret": "s", "server": "9", "title": "t"})
-    assert (p.width, p.height, p.aspect, p.srcset) == (0, 0, 1.5, "")
+    assert (p.width, p.height, p.aspect, p.srcset, p.max_width) == (0, 0, 1.5, "", 0)
 
 
 def test_from_info_dimensions_and_srcset():

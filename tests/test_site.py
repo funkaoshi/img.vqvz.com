@@ -180,10 +180,12 @@ def test_photos_are_framed_to_fill_viewport(client):
     html = client.get("/").get_data(as_text=True)
     assert '<html lang="en" class="photos">' in html
     assert html.count('class="frame"') == 10
-    assert 'style="--ar: 1.4993"' in html and 'style="--ar: 0.6670"' in html  # 1024x683, 683x1024
+    # aspect ratio, and the cap at the largest Flickr size (no upscaling)
+    assert 'style="--ar: 1.4993; --max-w: 2048px"' in html   # new photo, up to 2048 wide
+    assert 'style="--ar: 0.6670; --max-w: 683px"' in html    # old portrait, stops at Large
     assert 'width="1024" height="683"' in html
     assert re.search(r'srcset="[^"]+_k\.jpg 2048w"', html)
-    assert 'sizes="(max-width: 600px) calc(100vw - 24px), min(calc(100vw - 50px), calc((100vh - 90px) * 1.4993))"' in html
+    assert 'sizes="(max-width: 600px) calc(100vw - 24px), min(calc(100vw - 50px), calc((100vh - 90px) * 1.4993), 2048px)"' in html
     assert meta(html, "og:image").endswith("_b.jpg")  # link previews still use Large
 
 

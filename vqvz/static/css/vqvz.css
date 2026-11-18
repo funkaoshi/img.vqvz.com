@@ -41,7 +41,9 @@ body {
 /* Style Photo
    Each photo + caption fills the viewport: the frame is as wide as the page
    allows, or as wide as fits the viewport height at the photo's aspect ratio
-   (--ar, set per photo), whichever is smaller. Small images scale up too.
+   (--ar, set per photo), whichever is smaller, but never wider than the
+   largest size Flickr has (--max-w): small images are not upscaled. A photo
+   held at its own size sits centred in its block.
    The banner stays fixed at the top, so "the viewport" here means the space
    below it (100svh - --banner).
    Each .photo block is as tall as its photo can be: one viewport when the
@@ -83,8 +85,8 @@ html.photos #content { max-width: none; padding: 0 var(--gutter); }
 }
 
 .frame {
-    width: min(100%, calc((100vh - var(--banner) - var(--chrome)) * var(--ar, 1.5)));
-    width: min(100%, calc((100svh - var(--banner) - var(--chrome)) * var(--ar, 1.5)));
+    width: min(100%, calc((100vh - var(--banner) - var(--chrome)) * var(--ar, 1.5)), var(--max-w, 100%));
+    width: min(100%, calc((100svh - var(--banner) - var(--chrome)) * var(--ar, 1.5)), var(--max-w, 100%));
 }
 
 .frame img {

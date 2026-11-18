@@ -18,7 +18,8 @@
 
 {#
   A photo sized to fill the viewport: image + caption fit whichever bound comes
-  first, viewport height or page width (see .frame in vqvz.css). --ar is the
+  first, viewport height, page width, or the largest size Flickr has (--max-w;
+  photos are never upscaled). --ar is the
   aspect ratio; sizes tells the browser the display width so srcset picks a
   sharp image. 24px/50px = both side margins (--gutter); 90px = --chrome (64px)
   plus the desktop banner (26px).
@@ -26,10 +27,10 @@
 #}
 {% macro photo_frame(img, eager=False) -%}
   {%- set ar = '%.4f'|format(img.aspect) -%}
-  <div class="photo hentry" id="p{{ img.id }}" style="--ar: {{ ar }}">
+  <div class="photo hentry" id="p{{ img.id }}" style="--ar: {{ ar }}{% if img.max_width %}; --max-w: {{ img.max_width }}px{% endif %}">
     <div class="frame">
       <a href="{{ img.page_url }}"><img src="{{ img.img_url }}"
-        {%- if img.srcset %} srcset="{{ img.srcset }}" sizes="(max-width: 600px) calc(100vw - 24px), min(calc(100vw - 50px), calc((100vh - 90px) * {{ ar }}))"{% endif %}
+        {%- if img.srcset %} srcset="{{ img.srcset }}" sizes="(max-width: 600px) calc(100vw - 24px), min(calc(100vw - 50px), calc((100vh - 90px) * {{ ar }}){% if img.max_width %}, {{ img.max_width }}px{% endif %})"{% endif %}
         {%- if img.width and img.height %} width="{{ img.width }}" height="{{ img.height }}"{% endif %} alt="{{ img.title }}" loading="{{ 'eager' if eager else 'lazy' }}"></a>
       <div class="caption">{{ caller() }}</div>
     </div>

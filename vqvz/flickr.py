@@ -93,6 +93,12 @@ class Photo:
         return self.width / self.height if self.width and self.height else 1.5
 
     @property
+    def max_width(self) -> int:
+        """Width of the largest size Flickr offers; 0 when unknown.
+        Photos are never displayed wider than this (no upscaling)."""
+        return max([w for _, w in self.sources] + [self.width])
+
+    @property
     def srcset(self) -> str:
         return ", ".join(f"{url} {w}w" for url, w in self.sources)
 
